@@ -1,6 +1,5 @@
 import { HomeClient } from "@/components/home-client";
 import { getSettings, getTodayMenu } from "@/lib/api";
-import { withIds } from "@/lib/types";
 import type { StoreSettings, TodayMenu } from "@/lib/types";
 
 export async function HomeData() {
@@ -16,5 +15,5 @@ export async function HomeData() {
   if (menuRes.status === "fulfilled") menu = menuRes.value;
   if (settingsRes.status === "fulfilled") settings = settingsRes.value;
 
-  return <HomeClient menu={menu ? withIds(menu) : null} settings={settings} />;
+  return <HomeClient menu={menu} settings={settings} />;
 }
