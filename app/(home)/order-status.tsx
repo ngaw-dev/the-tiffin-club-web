@@ -14,8 +14,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { cancelOrder, lookupOrder } from "@/lib/api";
+import { getOrder, lookupOrder } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
+import { todayOrders } from "@/lib/order-store";
+import { CancelOrderDialog } from "@/app/(home)/cancel-order-dialog";
 import type { Order } from "@/lib/types";
 
 /** Compact header link + dialog for finding an existing order. */
@@ -26,6 +28,27 @@ export function FindOrderLink() {
   const [busy, setBusy] = useState(false);
   const [order, setOrder] = useState<Order | null>(null);
   const [statusOpen, setStatusOpen] = useState(false);
+  const [stored, setStored] = useState<{ token: string; label: string }[]>([]);
+  const [cancelToken, setCancelToken] = useState<string | null>(null);
+
+  function openDialog() {
+    // Refresh stored orders each time; tokens expire at end of day.
+    setStored(todayOrders().map((o) => ({ token: o.token, label: o.token })));
+    setOpen(true);
+  }
+
+  async function openStored(tok: string) {
+    setBusy(true);
+    try {
+      setOrder(await getOrder(tok));
+      setOpen(false);
+      setStatusOpen(true);
+    } catch {
+      toast.error("Couldn't load that order — it may have expired.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -51,7 +74,7 @@ export function FindOrderLink() {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={openDialog}
         className="rounded-lg px-3 py-2 text-sm font-medium underline-offset-4 hover:underline"
       >
         Find my order
@@ -61,9 +84,28 @@ export function FindOrderLink() {
           <DialogHeader>
             <DialogTitle>Find my order</DialogTitle>
             <DialogDescription>
-              Enter the manage token from your confirmation plus the email or phone you used.
+              {stored.length
+                ? "Your orders from today on this device, or look one up with your details."
+                : "Enter the manage token from your confirmation plus the email or phone you used."}
             </DialogDescription>
           </DialogHeader>
+          {stored.length > 0 && (
+            <div className="space-y-2">
+              {stored.map((s) => (
+                <button
+                  key={s.token}
+                  type="button"
+                  disabled={busy}
+                  onClick={() => openStored(s.token)}
+                  className="flex w-full items-center justify-between rounded-lg border border-border bg-background px-3.5 py-2.5 text-left text-sm hover:bg-secondary/60 disabled:opacity-50"
+                >
+                  <span className="font-mono text-xs">{s.label}</span>
+                  <span className="text-muted-foreground">View →</span>
+                </button>
+              ))}
+              <Separator />
+            </div>
+          )}
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="lookup-token">Manage token</Label>
@@ -104,23 +146,10 @@ export function OrderStatusDialog({
   onOpenChange: (o: boolean) => void;
 }) {
   const [current, setCurrent] = useState<Order | null>(order);
-  const [busy, setBusy] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   const shown = current ?? order;
   if (!shown) return null;
-
-  async function doCancel() {
-    setBusy(true);
-    try {
-      const updated = await cancelOrder(shown!.manage_token);
-      setCurrent(updated);
-      toast.success("Order cancelled.");
-    } catch {
-      toast.error("Could not cancel — the cutoff may have passed.");
-    } finally {
-      setBusy(false);
-    }
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -171,10 +200,26 @@ export function OrderStatusDialog({
         </div>
 
         {shown.status !== "cancelled" ? (
-          <Button variant="outline" onClick={doCancel} disabled={busy}>
+          <button
+            type="button"
+            onClick={() => setCancelOpen(true)}
+            className="text-sm text-muted-foreground underline-offset-4 hover:text-destructive hover:underline"
+          >
             Cancel order
-          </Button>
+          </button>
         ) : null}
+        {shown.status !== "cancelled" && (
+          <CancelOrderDialog
+            token={shown.manage_token}
+            open={cancelOpen}
+            onOpenChange={setCancelOpen}
+            onCancelled={() => {
+              setCancelOpen(false);
+              // Reflect cancellation without a second DELETE.
+              setCurrent({ ...shown, status: "cancelled" });
+            }}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

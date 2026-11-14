@@ -51,9 +51,7 @@ export function CancelOrderDialog({
           <DialogTitle>Cancel this order?</DialogTitle>
           <DialogDescription>
             This can&apos;t be undone.
-            {cutoffTime
-              ? ` You can cancel until ${cutoffTime}.`
-              : ""}
+            {cutoffTime ? ` You can cancel until ${cutoffTime}.` : ""}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2">

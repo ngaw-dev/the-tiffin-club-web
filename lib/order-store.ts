@@ -14,8 +14,7 @@ function parse(raw: string | null): StoredOrder[] {
     const arr = JSON.parse(raw);
     if (!Array.isArray(arr)) return [];
     return arr.filter(
-      (e): e is StoredOrder =>
-        e && typeof e.token === "string" && typeof e.placedAt === "string",
+      (e): e is StoredOrder => e && typeof e.token === "string" && typeof e.placedAt === "string",
     );
   } catch {
     return [];

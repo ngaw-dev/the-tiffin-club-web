@@ -237,10 +237,7 @@ export default function CheckoutPage() {
             <h2 className="font-display text-lg font-semibold">Your items</h2>
             <ul className="mt-4 divide-y divide-border">
               {lines.map(({ item, quantity }) => (
-                <li
-                  key={item.id}
-                  className="flex items-center justify-between gap-4 py-3"
-                >
+                <li key={item.id} className="flex items-center justify-between gap-4 py-3">
                   <div>
                     <p className="font-medium">{item.name}</p>
                     <p className="text-sm text-muted-foreground ttc-num">
@@ -267,9 +264,7 @@ export default function CheckoutPage() {
                 <span>
                   {line.quantity} × {line.item.name}
                 </span>
-                <span className="ttc-num">
-                  {formatMoney(line.item.price * line.quantity)}
-                </span>
+                <span className="ttc-num">{formatMoney(line.item.price * line.quantity)}</span>
               </li>
             ))}
           </ul>
