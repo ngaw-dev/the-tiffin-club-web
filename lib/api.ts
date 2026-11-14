@@ -12,7 +12,7 @@ import type {
 } from "./types";
 
 export const api = axios.create({
-  baseURL: "/api/v1",
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1",
   headers: { Accept: "application/json" },
 });
 
