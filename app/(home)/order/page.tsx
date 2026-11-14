@@ -9,6 +9,7 @@ import { toast, Toaster } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getOrder, getSettings, lookupOrder } from "@/lib/api";
@@ -140,11 +141,14 @@ function OrderCard({
   const expired = new Date(order.expires_at).getTime() <= Date.now();
 
   return (
-    <section className="mt-8 border border-border bg-card p-6">
-      <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
-        Your order
-        <Badge variant={cancelled ? "destructive" : "secondary"}>{order.status}</Badge>
-      </h2>
+    <Card className="mt-8 rounded-lg">
+      <CardHeader className="p-6 pb-0">
+        <CardTitle className="flex items-center gap-2 font-display text-lg font-semibold">
+          Your order
+          <Badge variant={cancelled ? "destructive" : "secondary"}>{order.status}</Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-6 pt-4">
 
       <dl className="mt-4 space-y-1 text-sm">
         <div className="flex justify-between">
@@ -190,7 +194,8 @@ function OrderCard({
           {cutoffTime ? ` (until ${cutoffTime})` : ""}
         </button>
       )}
-    </section>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -225,7 +230,9 @@ function LookupSection({ onFound }: { onFound: (o: Order) => void }) {
   return (
     <section className="mt-10">
       {open ? (
-        <form onSubmit={submit} className="space-y-4 border border-border bg-card p-6">
+        <form onSubmit={submit} className="space-y-4">
+          <Card className="rounded-lg">
+            <CardContent className="p-6">
           <h2 className="font-display text-lg font-semibold">Ordered on another device?</h2>
           <p className="text-sm text-muted-foreground">
             Enter the manage token from your confirmation plus the email or phone you used.
@@ -235,6 +242,7 @@ function LookupSection({ onFound }: { onFound: (o: Order) => void }) {
             <Input
               id="lookup-token"
               required
+              className="min-h-11 rounded-lg px-3.5"
               value={token}
               onChange={(e) => setToken(e.target.value)}
             />
@@ -244,18 +252,27 @@ function LookupSection({ onFound }: { onFound: (o: Order) => void }) {
             <Input
               id="lookup-contact"
               required
+              className="min-h-11 rounded-lg px-3.5"
               value={contact}
               onChange={(e) => setContact(e.target.value)}
             />
           </div>
           <div className="flex gap-2">
-            <Button type="submit" disabled={busy}>
+            <Button type="submit" className="min-h-11" disabled={busy}>
               {busy ? "Looking up…" : "Find order"}
             </Button>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={busy}>
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-11"
+              onClick={() => setOpen(false)}
+              disabled={busy}
+            >
               Close
             </Button>
           </div>
+            </CardContent>
+          </Card>
         </form>
       ) : (
         <button
