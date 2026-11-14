@@ -5,6 +5,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { toast, Toaster } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getSettings, getTodayMenu } from "@/lib/api";
 import { ApiError, placeOrder } from "@/lib/api";
 import { useCart } from "@/lib/cart-context";
@@ -92,9 +103,6 @@ export default function CheckoutPage() {
   const err = (k: string) =>
     fieldErrors[k] ? <p className="mt-1 text-sm text-destructive">{fieldErrors[k]}</p> : null;
 
-  const inputCls =
-    "mt-1.5 min-h-11 w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring";
-
   if (!lines.length) {
     return (
       <div className="mx-auto max-w-xl px-4 py-20 text-center sm:px-6">
@@ -107,8 +115,7 @@ export default function CheckoutPage() {
           className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-primary px-6 py-2.5 font-semibold text-primary-foreground transition hover:opacity-90 active:scale-[0.98]"
         >
           View today&apos;s menu
-        </Link>
-        <Toaster richColors position="top-center" />
+        </Link>        <Toaster richColors position="top-center" />
       </div>
     );
   }
@@ -160,11 +167,11 @@ export default function CheckoutPage() {
             <h2 className="font-display text-lg font-semibold">Your details</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <Field label="Name" required htmlFor="name">
-                <input
+                <Input
                   id="name"
                   required
                   autoComplete="name"
-                  className={inputCls}
+                  className="mt-1.5 min-h-11 rounded-lg px-3.5"
                   value={form.name}
                   onChange={(e) => set("name")(e.target.value)}
                 />
@@ -175,22 +182,22 @@ export default function CheckoutPage() {
                 htmlFor="phone"
                 hint="Email or phone — at least one is required."
               >
-                <input
+                <Input
                   id="phone"
                   type="tel"
                   autoComplete="tel"
-                  className={inputCls}
+                  className="mt-1.5 min-h-11 rounded-lg px-3.5"
                   value={form.phone}
                   onChange={(e) => set("phone")(e.target.value)}
                 />
                 {err("phone")}
               </Field>
               <Field label="Email (optional)" htmlFor="email">
-                <input
+                <Input
                   id="email"
                   type="email"
                   autoComplete="email"
-                  className={inputCls}
+                  className="mt-1.5 min-h-11 rounded-lg px-3.5"
                   value={form.email}
                   onChange={(e) => set("email")(e.target.value)}
                 />
@@ -201,31 +208,36 @@ export default function CheckoutPage() {
             {fulfilment === "delivery" && (
               <div className="mt-4 grid gap-4">
                 <Field label="Delivery address" required htmlFor="address">
-                  <textarea
+                  <Textarea
                     id="address"
                     required
                     rows={2}
-                    className={`${inputCls} resize-y`}
+                    className="mt-1.5 min-h-11 rounded-lg px-3.5 resize-y"
                     value={form.address}
                     onChange={(e) => set("address")(e.target.value)}
                   />
                   {err("address")}
                 </Field>
                 <Field label="Suburb" required htmlFor="suburb">
-                  <select
-                    id="suburb"
+                  <Select
                     required
-                    className={inputCls}
-                    value={form.suburb}
-                    onChange={(e) => set("suburb")(e.target.value)}
+                    value={form.suburb || undefined}
+                    onValueChange={(v) => set("suburb")(v)}
                   >
-                    <option value="">Choose your suburb</option>
-                    {settings?.delivery_suburbs.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger
+                      id="suburb"
+                      className="mt-1.5 min-h-11 w-full rounded-lg px-3.5"
+                    >
+                      <SelectValue placeholder="Choose your suburb" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {settings?.delivery_suburbs.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   {err("suburb")}
                 </Field>
               </div>
@@ -276,13 +288,14 @@ export default function CheckoutPage() {
             Pay in person at {fulfilment === "pickup" ? "pickup" : "delivery"}.
           </p>
 
-          <button
+          <Button
             type="submit"
+            size="lg"
             disabled={submitting}
-            className="mt-5 flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 font-semibold text-primary-foreground shadow-sm transition hover:opacity-90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
+            className="mt-5 min-h-11 w-full rounded-lg font-semibold"
           >
             {submitting ? "Placing order…" : `Place order · ${formatMoney(total)}`}
-          </button>
+          </Button>
           <p className="mt-3 text-xs text-muted-foreground">
             Need to change something?{" "}
             <Link href="/" className="text-primary underline underline-offset-4">
@@ -383,7 +396,7 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="text-sm font-medium">
+      <Label htmlFor={htmlFor} className="text-sm font-medium">
         {label}
         {required && (
           <span className="text-primary" aria-hidden>
@@ -391,7 +404,7 @@ function Field({
             *
           </span>
         )}
-      </label>
+      </Label>
       {children}
       {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
     </div>
