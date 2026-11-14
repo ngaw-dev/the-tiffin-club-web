@@ -44,10 +44,7 @@ export function FooterContact() {
         )}
         <p className="mt-2 text-muted-foreground">
           Have an order?{" "}
-          <Link
-            href="/home"
-            className="underline underline-offset-4 hover:text-foreground"
-          >
+          <Link href="/home" className="underline underline-offset-4 hover:text-foreground">
             Find my order
           </Link>
         </p>

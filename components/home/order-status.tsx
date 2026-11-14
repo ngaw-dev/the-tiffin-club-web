@@ -61,18 +61,27 @@ export function FindOrderLink() {
           <DialogHeader>
             <DialogTitle>Find my order</DialogTitle>
             <DialogDescription>
-              Enter the manage token from your confirmation plus the email or
-              phone you used.
+              Enter the manage token from your confirmation plus the email or phone you used.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="lookup-token">Manage token</Label>
-              <Input id="lookup-token" required value={token} onChange={(e) => setToken(e.target.value)} />
+              <Input
+                id="lookup-token"
+                required
+                value={token}
+                onChange={(e) => setToken(e.target.value)}
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="lookup-contact">Email or phone</Label>
-              <Input id="lookup-contact" required value={contact} onChange={(e) => setContact(e.target.value)} />
+              <Input
+                id="lookup-contact"
+                required
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
+              />
             </div>
             <Button type="submit" className="w-full" disabled={busy}>
               {busy ? "Looking up…" : "Find order"}
@@ -80,11 +89,7 @@ export function FindOrderLink() {
           </form>
         </DialogContent>
       </Dialog>
-      <OrderStatusDialog
-        order={order}
-        open={statusOpen}
-        onOpenChange={setStatusOpen}
-      />
+      <OrderStatusDialog order={order} open={statusOpen} onOpenChange={setStatusOpen} />
     </>
   );
 }
@@ -153,9 +158,7 @@ export function OrderStatusDialog({
               <span>
                 {it.quantity} × {it.name}
               </span>
-              <span className="ttc-num">
-                {formatMoney(it.unit_price * it.quantity)}
-              </span>
+              <span className="ttc-num">{formatMoney(it.unit_price * it.quantity)}</span>
             </li>
           ))}
         </ul>

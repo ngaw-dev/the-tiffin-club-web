@@ -43,7 +43,9 @@ export interface TodayMenu {
 }
 
 /** Assign positional ids (main=1, then extras) as the order API expects. */
-export function withIds(menu: TodayMenu): TodayMenu & { main: MenuItem | null; extras: MenuItem[] } {
+export function withIds(
+  menu: TodayMenu,
+): TodayMenu & { main: MenuItem | null; extras: MenuItem[] } {
   let next = 1;
   return {
     ...menu,

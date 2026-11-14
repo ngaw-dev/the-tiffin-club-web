@@ -2,17 +2,16 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { toast, Toaster } from "sonner";
+import { Toaster } from "sonner";
 import { formatMoney, formatTime } from "@/lib/format";
 import { getSettings, getTodayMenu } from "@/lib/api";
-import { RESTAURANT, contactFromSettings } from "@/lib/brand";
+import { contactFromSettings } from "@/lib/brand";
 import { useCart } from "@/lib/cart-context";
 import { OrderingStateBadge } from "@/components/home/ordering-state-badge";
 import { ClosingSoonCountdown } from "@/components/home/closing-soon-countdown";
 import { CheckoutSheet } from "@/components/home/checkout-sheet";
 import { OrderStatusDialog } from "@/components/home/order-status";
 import { usePrefill } from "@/components/home/sign-in";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { MenuItem, Order } from "@/lib/types";
 
@@ -44,7 +43,7 @@ export function HomeClient() {
       ? `${formatTime(ordering.opens_at)}-${formatTime(ordering.closes_at)}`
       : null;
 
-  const dishes: MenuItem[] = (menu?.main ? [menu.main, ...menu.extras] : menu?.extras ?? []).map(
+  const dishes: MenuItem[] = (menu?.main ? [menu.main, ...menu.extras] : (menu?.extras ?? [])).map(
     (item, i) => ({ ...item, id: i + 1 }), // positional ids per order API
   );
   const [mainItem, ...extras] = dishes;
@@ -64,8 +63,8 @@ export function HomeClient() {
           </h1>
           <p className="mt-4 max-w-md text-base text-muted-foreground sm:text-lg">
             One kitchen, one honest home-style tiffin a day.
-            {windowLabel ? ` Order by ${windowLabel.split("-")[1]},` : ""} pick
-            up or get it delivered in Wellington.
+            {windowLabel ? ` Order by ${windowLabel.split("-")[1]},` : ""} pick up or get it
+            delivered in Wellington.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <a
@@ -99,9 +98,7 @@ export function HomeClient() {
             Today&apos;s Menu
           </h2>
           {windowLabel && (
-            <span className="text-sm text-muted-foreground ttc-num">
-              Ordering {windowLabel} NZ
-            </span>
+            <span className="text-sm text-muted-foreground ttc-num">Ordering {windowLabel} NZ</span>
           )}
         </div>
 
@@ -111,10 +108,11 @@ export function HomeClient() {
           </div>
         ) : menuQuery.isError ? (
           <div className="mt-6 border border-border bg-card p-6 text-sm text-muted-foreground">
-            We couldn&apos;t load today&apos;s menu just now. Please refresh in a
-            moment{contact.phoneHref ? (
+            We couldn&apos;t load today&apos;s menu just now. Please refresh in a moment
+            {contact.phoneHref ? (
               <>
-                {" "}or call us at{" "}
+                {" "}
+                or call us at{" "}
                 <a className="text-primary underline underline-offset-4" href={contact.phoneHref}>
                   {contact.phone}
                 </a>
@@ -124,7 +122,17 @@ export function HomeClient() {
           </div>
         ) : !menu || menu.status === "coming_soon" ? (
           <div className="mt-6 border border-border bg-card p-8 text-center">
-            <OrderingStateBadge ordering={ordering ?? { state: "closed", open: false, closing_soon: false, opens_at: null, closes_at: null }} />
+            <OrderingStateBadge
+              ordering={
+                ordering ?? {
+                  state: "closed",
+                  open: false,
+                  closing_soon: false,
+                  opens_at: null,
+                  closes_at: null,
+                }
+              }
+            />
             <p className="mt-4 font-medium">No menu published for today yet.</p>
             <p className="mt-1.5 text-sm text-muted-foreground">
               Today&apos;s menu will be published soon — check back later.
@@ -135,11 +143,12 @@ export function HomeClient() {
             <OrderingStateBadge ordering={ordering} />
             <p className="mt-4 font-medium">Today&apos;s ordering is closed.</p>
             <p className="mt-1.5 text-sm text-muted-foreground">
-              Today&apos;s meals are already being prepared. Come back tomorrow
-              to order. Need something today?
+              Today&apos;s meals are already being prepared. Come back tomorrow to order. Need
+              something today?
               {contact.phoneHref ? (
                 <>
-                  {" "}Call{" "}
+                  {" "}
+                  Call{" "}
                   <a href={contact.phoneHref} className="text-primary underline underline-offset-4">
                     {contact.phone}
                   </a>
@@ -204,9 +213,7 @@ export function HomeClient() {
                           <div className="min-w-0">
                             <p className="font-medium">{extra.name}</p>
                             {extra.description ? (
-                              <p className="text-sm text-muted-foreground">
-                                {extra.description}
-                              </p>
+                              <p className="text-sm text-muted-foreground">{extra.description}</p>
                             ) : null}
                             <p className="mt-0.5 text-sm font-semibold ttc-num">
                               {formatMoney(extra.price)}
@@ -286,9 +293,7 @@ export function HomeClient() {
 
       {/* How it works */}
       <section id="how-it-works" className="scroll-mt-24 py-14">
-        <h2 className="font-display text-2xl font-semibold sm:text-3xl">
-          How it works
-        </h2>
+        <h2 className="font-display text-2xl font-semibold sm:text-3xl">How it works</h2>
         <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-14">
           <div className="group overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -343,9 +348,7 @@ export function HomeClient() {
 
       {/* FAQ */}
       <section id="faq" className="scroll-mt-24 pb-16">
-        <h2 className="font-display text-2xl font-semibold sm:text-3xl">
-          Common questions
-        </h2>
+        <h2 className="font-display text-2xl font-semibold sm:text-3xl">Common questions</h2>
         <div className="mt-6 divide-y divide-border border border-border bg-card">
           {[
             ...(windowLabel

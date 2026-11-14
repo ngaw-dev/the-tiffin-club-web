@@ -32,7 +32,13 @@ import type { Fulfilment, Order, StoreSettings } from "@/lib/types";
 interface CheckoutSheetProps {
   settings: StoreSettings;
   orderingOpen: boolean;
-  prefill?: { name: string | null; phone: string | null; email: string | null; address: string | null; suburb: string | null };
+  prefill?: {
+    name: string | null;
+    phone: string | null;
+    email: string | null;
+    address: string | null;
+    suburb: string | null;
+  };
   onPlaced: (order: Order) => void;
 }
 
@@ -46,7 +52,8 @@ export function CheckoutSheet({ settings, orderingOpen, prefill, onPlaced }: Che
     email: prefill?.email ?? "",
     phone: prefill?.phone ?? "",
     address: prefill?.address ?? "",
-    suburb: prefill?.suburb && settings.delivery_suburbs.includes(prefill.suburb) ? prefill.suburb : "",
+    suburb:
+      prefill?.suburb && settings.delivery_suburbs.includes(prefill.suburb) ? prefill.suburb : "",
   });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -116,16 +123,27 @@ export function CheckoutSheet({ settings, orderingOpen, prefill, onPlaced }: Che
               <li key={item.id} className="flex items-center justify-between gap-3 text-sm">
                 <div className="min-w-0">
                   <p className="font-medium">{item.name}</p>
-                  <p className="text-muted-foreground">
-                    {formatMoney(item.price)} each
-                  </p>
+                  <p className="text-muted-foreground">{formatMoney(item.price)} each</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button type="button" size="icon-sm" variant="outline" aria-label={`Remove one ${item.name}`} onClick={() => setQuantity(item.id, quantity - 1)}>
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    variant="outline"
+                    aria-label={`Remove one ${item.name}`}
+                    onClick={() => setQuantity(item.id, quantity - 1)}
+                  >
                     <Minus className="h-4 w-4" aria-hidden />
                   </Button>
                   <span className="w-8 text-center tabular-nums">{quantity}</span>
-                  <Button type="button" size="icon-sm" variant="outline" aria-label={`Add one ${item.name}`} disabled={quantity >= 20} onClick={() => setQuantity(item.id, quantity + 1)}>
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    variant="outline"
+                    aria-label={`Add one ${item.name}`}
+                    disabled={quantity >= 20}
+                    onClick={() => setQuantity(item.id, quantity + 1)}
+                  >
                     <Plus className="h-4 w-4" aria-hidden />
                   </Button>
                 </div>
@@ -145,11 +163,15 @@ export function CheckoutSheet({ settings, orderingOpen, prefill, onPlaced }: Che
             >
               <div className="flex items-center gap-2 rounded-lg border p-3">
                 <RadioGroupItem value="pickup" id="fulfilment-pickup" />
-                <Label htmlFor="fulfilment-pickup" className="font-normal">Pickup</Label>
+                <Label htmlFor="fulfilment-pickup" className="font-normal">
+                  Pickup
+                </Label>
               </div>
               <div className="flex items-center gap-2 rounded-lg border p-3">
                 <RadioGroupItem value="delivery" id="fulfilment-delivery" />
-                <Label htmlFor="fulfilment-delivery" className="font-normal">Delivery</Label>
+                <Label htmlFor="fulfilment-delivery" className="font-normal">
+                  Delivery
+                </Label>
               </div>
             </RadioGroup>
             {fulfilment === "pickup" && settings.pickup_start_time ? (
@@ -162,19 +184,39 @@ export function CheckoutSheet({ settings, orderingOpen, prefill, onPlaced }: Che
           {/* Contact */}
           <div className="space-y-1.5">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" required value={form.name} onChange={(e) => set("name")(e.target.value)} autoComplete="name" />
+            <Input
+              id="name"
+              required
+              value={form.name}
+              onChange={(e) => set("name")(e.target.value)}
+              autoComplete="name"
+            />
             {err("name")}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={form.email} onChange={(e) => set("email")(e.target.value)} autoComplete="email" />
+            <Input
+              id="email"
+              type="email"
+              value={form.email}
+              onChange={(e) => set("email")(e.target.value)}
+              autoComplete="email"
+            />
             {err("email")}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="phone">Phone</Label>
-            <Input id="phone" type="tel" value={form.phone} onChange={(e) => set("phone")(e.target.value)} autoComplete="tel" />
+            <Input
+              id="phone"
+              type="tel"
+              value={form.phone}
+              onChange={(e) => set("phone")(e.target.value)}
+              autoComplete="tel"
+            />
             {err("phone")}
-            <p className="text-xs text-muted-foreground">Email or phone — at least one is required.</p>
+            <p className="text-xs text-muted-foreground">
+              Email or phone — at least one is required.
+            </p>
           </div>
 
           {/* Delivery details */}
@@ -182,7 +224,12 @@ export function CheckoutSheet({ settings, orderingOpen, prefill, onPlaced }: Che
             <>
               <div className="space-y-1.5">
                 <Label htmlFor="address">Address</Label>
-                <Input id="address" value={form.address} onChange={(e) => set("address")(e.target.value)} autoComplete="street-address" />
+                <Input
+                  id="address"
+                  value={form.address}
+                  onChange={(e) => set("address")(e.target.value)}
+                  autoComplete="street-address"
+                />
                 {err("address")}
               </div>
               <div className="space-y-1.5">
@@ -193,7 +240,9 @@ export function CheckoutSheet({ settings, orderingOpen, prefill, onPlaced }: Che
                   </SelectTrigger>
                   <SelectContent>
                     {settings.delivery_suburbs.map((s) => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -210,7 +259,13 @@ export function CheckoutSheet({ settings, orderingOpen, prefill, onPlaced }: Che
             <span>Total (pay in person)</span>
             <span className="tabular-nums">{formatMoney(total)}</span>
           </div>
-          <Button type="submit" size="lg" className="w-full" disabled={submitting || !lines.length} onClick={submit as unknown as React.MouseEventHandler}>
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full"
+            disabled={submitting || !lines.length}
+            onClick={submit as unknown as React.MouseEventHandler}
+          >
             {submitting ? "Placing order…" : `Place order · ${formatMoney(total)}`}
           </Button>
         </SheetFooter>

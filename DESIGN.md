@@ -19,17 +19,17 @@ after.
 Primary palette is warm orange (appetite appeal); fresh green reserved for
 veg indicators. Defined as shadcn CSS variables (`oklch`), light and dark:
 
-| Token | Light (approx) | Dark (approx) | Usage |
-|---|---|---|---|
-| `--primary` | orange ~`#EA580C` | brighter orange ~`#FB923C` | CTAs, active states, brand |
-| `--primary-foreground` | white | near-black | Text on primary |
-| `--secondary` | warm brown/neutral | darker warm neutral | Secondary buttons, chips |
-| `--accent` (veg) | green ~`#16A34A` | green ~`#4ADE80` | Veg indicator dots, "open now" |
-| `--destruct` | red | red | Cancelled, errors, non-veg dot |
-| `--success` | green | green | Delivered, order confirmed |
-| `--warning` | amber | amber | Delayed, "closing soon" |
-| `--background` / `--foreground` | warm white / warm near-black | `#0a0a0a` / `#ededed` | Page |
-| `--muted` / `--border` / `--ring` | shadcn `neutral` scale | same scale | Standard chrome |
+| Token                             | Light (approx)               | Dark (approx)              | Usage                          |
+| --------------------------------- | ---------------------------- | -------------------------- | ------------------------------ |
+| `--primary`                       | orange ~`#EA580C`            | brighter orange ~`#FB923C` | CTAs, active states, brand     |
+| `--primary-foreground`            | white                        | near-black                 | Text on primary                |
+| `--secondary`                     | warm brown/neutral           | darker warm neutral        | Secondary buttons, chips       |
+| `--accent` (veg)                  | green ~`#16A34A`             | green ~`#4ADE80`           | Veg indicator dots, "open now" |
+| `--destruct`                      | red                          | red                        | Cancelled, errors, non-veg dot |
+| `--success`                       | green                        | green                      | Delivered, order confirmed     |
+| `--warning`                       | amber                        | amber                      | Delayed, "closing soon"        |
+| `--background` / `--foreground`   | warm white / warm near-black | `#0a0a0a` / `#ededed`      | Page                           |
+| `--muted` / `--border` / `--ring` | shadcn `neutral` scale       | same scale                 | Standard chrome                |
 
 ### Typography
 
@@ -88,11 +88,11 @@ cancel), `sign-in` (Tabs login/register), `home-client` (page shell).
 
 ## Decision Log
 
-| Date | Decision | Rationale |
-|---|---|---|
-| 2026-11-14 | Initialized DESIGN.md from `globals.css` baseline | Retroactive codification |
-| 2026-11-14 | Primary palette: warm orange | Appetite appeal, energy; green reserved for veg |
-| 2026-11-14 | On-demand ordering only, no subscriptions | Product scope decision |
-| 2026-11-14 | shadcn/ui + @shadcnblocks premium blocks as component source of truth | Consistency, speed, premium quality |
+| Date       | Decision                                                                                                         | Rationale                                                   |
+| ---------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| 2026-11-14 | Initialized DESIGN.md from `globals.css` baseline                                                                | Retroactive codification                                    |
+| 2026-11-14 | Primary palette: warm orange                                                                                     | Appetite appeal, energy; green reserved for veg             |
+| 2026-11-14 | On-demand ordering only, no subscriptions                                                                        | Product scope decision                                      |
+| 2026-11-14 | shadcn/ui + @shadcnblocks premium blocks as component source of truth                                            | Consistency, speed, premium quality                         |
 | 2026-11-14 | Single-page home: menu + cart + checkout in Sheet, order lookup via dialog; axios client unwrapping API envelope | api.md is guest-first; one page covers the whole storefront |
-| 2026-11-14 | Warm-orange `oklch` tokens in `globals.css` (light+dark), `.75rem` radius | Implements the palette decision as shadcn CSS variables |
+| 2026-11-14 | Warm-orange `oklch` tokens in `globals.css` (light+dark), `.75rem` radius                                        | Implements the palette decision as shadcn CSS variables     |

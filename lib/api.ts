@@ -107,10 +107,7 @@ export function getOrder(token: string): Promise<Order> {
   return unwrap(api.get<ApiEnvelope<Order>>(`/orders/${token}`));
 }
 
-export function updateOrder(
-  token: string,
-  input: Partial<PlaceOrderInput>,
-): Promise<Order> {
+export function updateOrder(token: string, input: Partial<PlaceOrderInput>): Promise<Order> {
   return unwrap(api.patch<ApiEnvelope<Order>>(`/orders/${token}`, input));
 }
 

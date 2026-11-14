@@ -14,9 +14,7 @@ export function OrderingStateBadge({
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${STATE_CLASSES[state] ?? STATE_CLASSES.closed} ${className}`}
     >
-      <span aria-hidden>
-        {state === "open" ? "●" : state === "closing_soon" ? "◐" : "✕"}
-      </span>
+      <span aria-hidden>{state === "open" ? "●" : state === "closing_soon" ? "◐" : "✕"}</span>
       {STATE_LABEL[state] ?? "Ordering closed"}
     </span>
   );

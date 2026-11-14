@@ -93,8 +93,7 @@ export function SignInLink() {
           <DialogHeader>
             <DialogTitle>Account (optional)</DialogTitle>
             <DialogDescription>
-              Save your details and see past orders. Ordering without an account
-              works too.
+              Save your details and see past orders. Ordering without an account works too.
             </DialogDescription>
           </DialogHeader>
           <Tabs defaultValue="login">
@@ -106,30 +105,69 @@ export function SignInLink() {
               <form onSubmit={doLogin} className="space-y-4 pt-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="login-email">Email</Label>
-                  <Input id="login-email" type="email" required value={form.email} onChange={set("email")} autoComplete="email" />
+                  <Input
+                    id="login-email"
+                    type="email"
+                    required
+                    value={form.email}
+                    onChange={set("email")}
+                    autoComplete="email"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="login-password">Password</Label>
-                  <Input id="login-password" type="password" required value={form.password} onChange={set("password")} autoComplete="current-password" />
+                  <Input
+                    id="login-password"
+                    type="password"
+                    required
+                    value={form.password}
+                    onChange={set("password")}
+                    autoComplete="current-password"
+                  />
                 </div>
-                <Button type="submit" className="w-full" disabled={busy}>Sign in</Button>
+                <Button type="submit" className="w-full" disabled={busy}>
+                  Sign in
+                </Button>
               </form>
             </TabsContent>
             <TabsContent value="register">
               <form onSubmit={doRegister} className="space-y-4 pt-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-email">Email</Label>
-                  <Input id="reg-email" type="email" required value={form.email} onChange={set("email")} autoComplete="email" />
+                  <Input
+                    id="reg-email"
+                    type="email"
+                    required
+                    value={form.email}
+                    onChange={set("email")}
+                    autoComplete="email"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-password">Password</Label>
-                  <Input id="reg-password" type="password" required value={form.password} onChange={set("password")} autoComplete="new-password" />
+                  <Input
+                    id="reg-password"
+                    type="password"
+                    required
+                    value={form.password}
+                    onChange={set("password")}
+                    autoComplete="new-password"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-password2">Confirm password</Label>
-                  <Input id="reg-password2" type="password" required value={form.password_confirmation} onChange={set("password_confirmation")} autoComplete="new-password" />
+                  <Input
+                    id="reg-password2"
+                    type="password"
+                    required
+                    value={form.password_confirmation}
+                    onChange={set("password_confirmation")}
+                    autoComplete="new-password"
+                  />
                 </div>
-                <Button type="submit" className="w-full" disabled={busy}>Register</Button>
+                <Button type="submit" className="w-full" disabled={busy}>
+                  Register
+                </Button>
               </form>
             </TabsContent>
           </Tabs>

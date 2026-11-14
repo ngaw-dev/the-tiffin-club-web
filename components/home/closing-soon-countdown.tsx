@@ -40,8 +40,8 @@ export function ClosingSoonCountdown({ closesAt }: { closesAt: string }) {
 
   return (
     <p className="text-sm font-medium text-primary" role="status">
-      Heads up: ordering closes at {formatTime(closesAt)} ({label} left). Get
-      your tiffin in before then!
+      Heads up: ordering closes at {formatTime(closesAt)} ({label} left). Get your tiffin in before
+      then!
     </p>
   );
 }

@@ -34,22 +34,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
-  const addItem = useCallback(
-    (item: MenuItem, quantity = 1) => {
-      setLines((prev) => {
-        const existing = prev.find((l) => l.item.id === item.id);
-        if (existing) {
-          return prev.map((l) =>
-            l.item.id === item.id
-              ? { ...l, quantity: Math.min(20, l.quantity + quantity) }
-              : l,
-          );
-        }
-        return [...prev, { item, quantity: Math.min(20, Math.max(1, quantity)) }];
-      });
-    },
-    [],
-  );
+  const addItem = useCallback((item: MenuItem, quantity = 1) => {
+    setLines((prev) => {
+      const existing = prev.find((l) => l.item.id === item.id);
+      if (existing) {
+        return prev.map((l) =>
+          l.item.id === item.id ? { ...l, quantity: Math.min(20, l.quantity + quantity) } : l,
+        );
+      }
+      return [...prev, { item, quantity: Math.min(20, Math.max(1, quantity)) }];
+    });
+  }, []);
 
   const removeItem = useCallback((itemId: number) => {
     setLines((prev) => prev.filter((l) => l.item.id !== itemId));
@@ -68,8 +63,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       clear,
       count,
       total,
-      toPayload: () =>
-        lines.map((l) => ({ id: l.item.id, quantity: l.quantity })),
+      toPayload: () => lines.map((l) => ({ id: l.item.id, quantity: l.quantity })),
     };
   }, [lines, addItem, setQuantity, removeItem, clear]);
 
