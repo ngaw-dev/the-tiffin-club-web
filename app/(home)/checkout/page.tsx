@@ -422,27 +422,29 @@ function QuantityStepper({
 }) {
   return (
     <div className="inline-flex items-center rounded-lg border border-border bg-background">
-      <button
+      <Button
         type="button"
+        variant="ghost"
         aria-label={`Decrease ${label}`}
         disabled={value === 0}
         onClick={() => onChange(value - 1)}
-        className="flex h-11 w-11 items-center justify-center rounded-l-lg text-lg font-semibold text-secondary-foreground hover:bg-secondary disabled:opacity-40"
+        className="h-11 w-11 rounded-l-lg rounded-r-none border-0 text-lg font-semibold text-secondary-foreground hover:bg-secondary disabled:opacity-40"
       >
         −
-      </button>
+      </Button>
       <span aria-live="polite" className="w-10 text-center font-semibold ttc-num">
         {value}
       </span>
-      <button
+      <Button
         type="button"
+        variant="ghost"
         aria-label={`Increase ${label}`}
         disabled={value >= 20}
         onClick={() => onChange(value + 1)}
-        className="flex h-11 w-11 items-center justify-center rounded-r-lg text-lg font-semibold text-secondary-foreground hover:bg-secondary disabled:opacity-40"
+        className="h-11 w-11 rounded-r-lg rounded-l-none border-0 text-lg font-semibold text-secondary-foreground hover:bg-secondary disabled:opacity-40"
       >
         +
-      </button>
+      </Button>
     </div>
   );
 }

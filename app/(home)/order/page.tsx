@@ -185,14 +185,14 @@ function OrderCard({
       </div>
 
       {!cancelled && !expired && (
-        <button
-          type="button"
+        <Button
+          variant="link"
           onClick={onCancel}
-          className="mt-5 text-sm text-muted-foreground underline-offset-4 hover:text-destructive hover:underline"
+          className="mt-5 min-h-11 px-0 text-sm font-normal text-muted-foreground underline-offset-4 hover:text-destructive"
         >
           Cancel order
           {cutoffTime ? ` (until ${cutoffTime})` : ""}
-        </button>
+        </Button>
       )}
       </CardContent>
     </Card>
@@ -275,13 +275,13 @@ function LookupSection({ onFound }: { onFound: (o: Order) => void }) {
           </Card>
         </form>
       ) : (
-        <button
-          type="button"
+        <Button
+          variant="link"
           onClick={() => setOpen(true)}
-          className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+          className="min-h-11 px-0 text-sm font-normal text-muted-foreground"
         >
           Ordered on another device? Find your order
-        </button>
+        </Button>
       )}
     </section>
   );
