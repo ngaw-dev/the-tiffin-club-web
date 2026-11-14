@@ -68,6 +68,22 @@ Rules:
 - Follow the project's configured shadcn conventions: named style, base color,
   CSS variables, and icon library (e.g., lucide) for all icons.
 - Compose screens from these primitives instead of one-off styling.
+- **Migrate raw elements, don't add new ones.** When touching a file that still
+  uses raw `<input>`, `<textarea>`, `<select>`, `<label>`, or hand-styled
+  `<button>`s, replace them with the shadcn equivalents in the same change —
+  raw controls are technical debt, not a pattern to extend. If the needed
+  primitive isn't installed (check `components/ui/`), add it via
+  `npx shadcn@latest add <name>` rather than hand-rolling. Custom composites
+  (e.g. selectable option cards with `aria-pressed`) are acceptable only when
+  no primitive combination fits.
+- **Tap-target floor: `min-h-11` (44px).** shadcn defaults to `h-9`; override
+  with `min-h-11` (plus the project's `rounded-lg`) via className when adopting
+  primitives — never accept shadcn's default sizing on primary interactive
+  controls.
+- **Never add per-element `cursor-pointer` classes.** The pointer cursor is
+  applied globally in `app/globals.css` (`button:not(:disabled)`,
+  `[role="button"]:not(:disabled)`, `select`, `summary`, `label[for]`); disabled
+  controls intentionally stay `cursor: default`.
 - Every interactive element gets all relevant states: default, hover,
   focus-visible, active, disabled, loading, empty, and error where applicable.
 - Mobile-first: design the smallest layout, then enhance at defined
@@ -124,6 +140,8 @@ Do not call UI work done until every item passes:
 - [ ] Accessibility: semantic markup, keyboard operable, AA contrast, visible
       focus
 - [ ] Consistency: matches `DESIGN.md` tokens and existing patterns
+- [ ] Primitives: no raw form controls or hand-styled buttons introduced;
+      anything touched was migrated to shadcn with `min-h-11` sizing
 - [ ] Content: real copy, no placeholders, no dead-end screens or flows
 - [ ] Lint & format: `pnpm lint:ox` clean, `pnpm format:check` passes
 - [ ] Decision log: new/changed decisions recorded in `DESIGN.md`
