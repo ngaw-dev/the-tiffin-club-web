@@ -81,13 +81,13 @@ export function SignInLink() {
 
   return (
     <>
-      <button
-        type="button"
+      <Button
+        variant="link"
         onClick={() => setOpen(true)}
-        className="rounded-lg px-3 py-2 text-sm font-medium underline-offset-4 hover:underline"
+        className="min-h-11 px-3 py-2 text-sm font-medium"
       >
         Sign in
-      </button>
+      </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
