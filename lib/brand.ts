@@ -1,4 +1,4 @@
-import type { OrderingState, StoreSettings } from "./types";
+import type { StoreSettings } from "./types";
 
 export const RESTAURANT = {
   name: "The Tiffin Club",

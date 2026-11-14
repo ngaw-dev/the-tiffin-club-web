@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { formatTime } from "@/lib/format";
 
 /**
@@ -17,9 +17,12 @@ export function ClosingSoonCountdown({ closesAt }: { closesAt: string }) {
 
   // Compute today's cutoff Date from HH:MM in the user's timezone.
   const [h, m] = closesAt.split(":").map(Number);
-  const cutoff = new Date();
-  cutoff.setHours(h, m, 0, 0);
-  const remaining = cutoff.getTime() - now;
+  const remaining = useMemo(() => {
+    const cutoff = new Date(now);
+    cutoff.setHours(h, m, 0, 0);
+    return cutoff.getTime() - now;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [closesAt, now]);
 
   if (remaining <= 0) {
     return (
@@ -39,9 +42,9 @@ export function ClosingSoonCountdown({ closesAt }: { closesAt: string }) {
         : "less than a minute";
 
   return (
-    <p className="text-sm font-medium text-primary" role="status">
+    <output className="block text-sm font-medium text-primary">
       Heads up: ordering closes at {formatTime(closesAt)} ({label} left). Get your tiffin in before
       then!
-    </p>
+    </output>
   );
 }

@@ -103,6 +103,10 @@ This repo uses **oxlint** and **oxfmt** — not ESLint/Prettier:
   hand-format to another style — oxfmt output is canonical.
 - Config lives in `.oxlintrc.json`; extend it rather than adding inline
   disables.
+- **Generated/vendor components (e.g., `components/ui/**` shadcn) are
+  excluded** from lint/format via `ignorePatterns` in `.oxlintrc.json` and
+  `.oxfmtrc.json` — never hand-edit or re-lint them; regenerate via the CLI
+  instead.
 
 ## 7. Pre-completion gate (strict)
 

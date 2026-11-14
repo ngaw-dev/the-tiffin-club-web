@@ -28,8 +28,14 @@ export function HomeClient() {
   const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
   const [statusOpen, setStatusOpen] = useState(false);
 
-  const menuQuery = useQuery({ queryKey: ["menu", "today"], queryFn: getTodayMenu });
-  const settingsQuery = useQuery({ queryKey: ["settings"], queryFn: getSettings });
+  const menuQuery = useQuery({
+    queryKey: ["menu", "today"],
+    queryFn: getTodayMenu,
+  });
+  const settingsQuery = useQuery({
+    queryKey: ["settings"],
+    queryFn: getSettings,
+  });
   const { data: prefill } = usePrefill();
 
   const menu = menuQuery.data ?? null;
@@ -414,7 +420,7 @@ function QuantityStepper({
         aria-label={`Decrease ${label}`}
         disabled={disabled || value === 0}
         onClick={() => onChange(value - 1)}
-        className="flex h-11 w-11 items-center justify-center rounded-l-lg text-lg font-semibold text-secondary-foreground hover:bg-secondary disabled:opacity-40"
+        className="flex h-11 w-11 items-center justify-center rounded-l-lg text-lg font-semibold text-secondary-foreground hover:bg-secondary disabled:opacity-40 cursor-pointer"
       >
         −
       </button>
@@ -426,7 +432,7 @@ function QuantityStepper({
         aria-label={`Increase ${label}`}
         disabled={disabled || value >= 20}
         onClick={() => onChange(value + 1)}
-        className="flex h-11 w-11 items-center justify-center rounded-r-lg text-lg font-semibold text-secondary-foreground hover:bg-secondary disabled:opacity-40"
+        className="flex h-11 w-11 items-center justify-center rounded-r-lg text-lg font-semibold text-secondary-foreground hover:bg-secondary disabled:opacity-40 cursor-pointer"
       >
         +
       </button>
