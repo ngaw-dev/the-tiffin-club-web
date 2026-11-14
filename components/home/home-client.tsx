@@ -1,44 +1,41 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { toast, Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Clock, MapPin, Phone, Mail, ChefHat } from "lucide-react";
-import { OrderingStatusBanner } from "@/components/ordering-status-banner";
-import { MenuItemCard } from "@/components/menu-item-card";
-import { CheckoutSheet } from "@/components/checkout-sheet";
-import { FindOrderButton, OrderStatusDialog } from "@/components/order-status";
-import { SignInButton, getToken } from "@/components/sign-in";
-import { getPrefill } from "@/lib/api";
+import { OrderingStatusBanner } from "@/components/home/ordering-status-banner";
+import { MenuItemCard } from "@/components/home/menu-item-card";
+import { CheckoutSheet } from "@/components/home/checkout-sheet";
+import { FindOrderButton, OrderStatusDialog } from "@/components/home/order-status";
+import { SignInButton, usePrefill } from "@/components/home/sign-in";
+import { getPrefill, getSettings, getTodayMenu } from "@/lib/api";
 import { formatMoney, formatTime } from "@/lib/format";
 import { useCart } from "@/lib/cart-context";
-import type { AccountPrefill, MenuItem, Order, StoreSettings, TodayMenu } from "@/lib/types";
+import type { MenuItem, Order } from "@/lib/types";
 
-interface HomeClientProps {
-  menu: TodayMenu | null;
-  settings: StoreSettings | null;
-}
-
-export function HomeClient({ menu, settings }: HomeClientProps) {
+export function HomeClient() {
   const { count } = useCart();
-  const [prefill, setPrefill] = useState<AccountPrefill | null>(null);
   const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
 
-  useEffect(() => {
-    const token = getToken();
-    if (!token) return;
-    getPrefill(token)
-      .then(setPrefill)
-      .catch(() => localStorage.removeItem("tiffin-club-token"));
-  }, []);
+  const menuQuery = useQuery({ queryKey: ["menu", "today"], queryFn: getTodayMenu });
+  const settingsQuery = useQuery({ queryKey: ["settings"], queryFn: getSettings });
+  const { data: prefill } = usePrefill();
+
+  const menu = menuQuery.data ?? null;
+  const settings = settingsQuery.data ?? null;
 
   const orderingOpen = menu?.ordering.state === "open" || menu?.ordering.state === "closing_soon";
 
   const dishes = useMemo(() => {
-    const withId = (menu?.main ? [menu.main, ...menu.extras] : menu?.extras ?? []) as MenuItem[];
-    return withId.map((item, i) => ({ ...item, id: i + 1 })); // positional ids per order API
+    const raw = (menu?.main ? [menu.main, ...menu.extras] : menu?.extras ?? []) as MenuItem[];
+    return raw.map((item, i) => ({ ...item, id: i + 1 })); // positional ids per order API
   }, [menu]);
+
+  const menuLoading = menuQuery.isPending;
+  const menuError = menuQuery.isError;
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -51,7 +48,7 @@ export function HomeClient({ menu, settings }: HomeClientProps) {
           </a>
           <nav className="flex items-center gap-1" aria-label="Account and orders">
             <FindOrderButton />
-            <SignInButton onSignedIn={setPrefill} />
+            <SignInButton />
           </nav>
         </div>
       </header>
@@ -86,7 +83,17 @@ export function HomeClient({ menu, settings }: HomeClientProps) {
             {menu?.date ? `Today · ${menu.date}` : "Today's menu"}
           </h2>
 
-          {!menu || menu.status === "coming_soon" ? (
+          {menuLoading ? (
+            <div className="mt-6 space-y-3" aria-busy="true" aria-label="Loading menu">
+              <Skeleton className="h-24 w-full rounded-lg" />
+              <Skeleton className="h-24 w-full rounded-lg" />
+              <Skeleton className="h-24 w-full rounded-lg" />
+            </div>
+          ) : menuError ? (
+            <p className="mt-4 rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+              We couldn&apos;t load today&apos;s menu. Please refresh and try again.
+            </p>
+          ) : !menu || menu.status === "coming_soon" ? (
             <p className="mt-4 rounded-lg border border-dashed p-8 text-center text-muted-foreground">
               Today&apos;s menu is being prepared — check back soon.
             </p>

@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
+import { formatMoney } from "@/lib/format";
 import type { MenuItem } from "@/lib/types";
 
 export function MenuItemCard({ item }: { item: MenuItem }) {
@@ -14,8 +15,13 @@ export function MenuItemCard({ item }: { item: MenuItem }) {
       className="flex items-start justify-between gap-4 rounded-lg border bg-card p-4 shadow-sm"
       aria-label={item.name}
     >
-      <div className="min-w-0">
-        <h3 className="font-medium leading-tight">{item.name}</h3>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline gap-2">
+          <h3 className="font-medium leading-tight">{item.name}</h3>
+          <span className="shrink-0 font-medium tabular-nums text-primary">
+            {formatMoney(item.price)}
+          </span>
+        </div>
         {item.description ? (
           <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
             {item.description}

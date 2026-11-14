@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { login, register, getPrefill } from "@/lib/api";
 import type { AccountPrefill } from "@/lib/types";
 
@@ -23,22 +24,28 @@ export function getToken(): string | null {
   return localStorage.getItem(STORAGE_KEY);
 }
 
-export function SignInButton({ onSignedIn }: { onSignedIn: (p: AccountPrefill) => void }) {
+/** Prefill data for checkout, queried when a saved account token exists. */
+export function usePrefill() {
+  return useQuery({
+    queryKey: ["account", "prefill"],
+    queryFn: () => getPrefill(getToken()!),
+    enabled: typeof window !== "undefined" && !!getToken(),
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function SignInButton() {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({ email: "", password: "", password_confirmation: "" });
+  const queryClient = useQueryClient();
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
   async function finish(token: string) {
     localStorage.setItem(STORAGE_KEY, token);
-    try {
-      const prefill = await getPrefill(token);
-      onSignedIn(prefill);
-    } catch {
-      onSignedIn({ name: null, email: null, phone: null, address: null, suburb: null });
-    }
+    await queryClient.invalidateQueries({ queryKey: ["account", "prefill"] });
     toast.success("Signed in — your details are prefilled.");
     setOpen(false);
   }
