@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "lint:ox": "oxlint"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.3.1",
@@ -37,6 +38,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "oxlint": "^1.93.0",
+    "oxlint-tsgolint": "^7.0.2007",
     "tailwindcss": "4.3.3",
     "typescript": "^5"
   }

@@ -94,7 +94,17 @@ Rules:
   short rationale (date, decision, why). Update the component inventory and
   token tables when they change.
 
-## 6. Pre-completion gate (strict)
+## 6. Lint & format with ox (required)
+
+This repo uses **oxlint** and **oxfmt** — not ESLint/Prettier:
+
+- After writing code, run `pnpm lint:ox` (oxlint) and fix all warnings/errors.
+- Format with `pnpm format` (oxfmt); `pnpm format:check` verifies. Never
+  hand-format to another style — oxfmt output is canonical.
+- Config lives in `.oxlintrc.json`; extend it rather than adding inline
+  disables.
+
+## 7. Pre-completion gate (strict)
 
 Do not call UI work done until every item passes:
 
@@ -105,6 +115,7 @@ Do not call UI work done until every item passes:
       focus
 - [ ] Consistency: matches `DESIGN.md` tokens and existing patterns
 - [ ] Content: real copy, no placeholders, no dead-end screens or flows
+- [ ] Lint & format: `pnpm lint:ox` clean, `pnpm format:check` passes
 - [ ] Decision log: new/changed decisions recorded in `DESIGN.md`
 
 If an item cannot pass, say so explicitly and record why in `DESIGN.md`.
