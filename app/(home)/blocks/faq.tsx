@@ -1,8 +1,15 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
 export function Faq({ windowLabel }: { windowLabel: string | null }) {
   return (
     <section id="faq" className="scroll-mt-24 pb-16">
       <h2 className="font-display text-2xl font-semibold sm:text-3xl">Common questions</h2>
-      <div className="mt-6 divide-y divide-border border border-border bg-card">
+      <Accordion type="single" collapsible className="mt-6 divide-y divide-border border border-border bg-card">
         {[
           ...(windowLabel
             ? [
@@ -25,19 +32,18 @@ export function Faq({ windowLabel }: { windowLabel: string | null }) {
             a: "We deliver to selected suburbs — the list is in checkout. We time the delivery run, so there's no need to pick a slot.",
           },
         ].map((item) => (
-          <details key={item.q} className="group px-6 py-4">
-            <summary className="list-none font-medium marker:hidden">
+          <AccordionItem key={item.q} value={item.q} className="border-0 px-6 py-4">
+            <AccordionTrigger className="py-0 font-medium hover:no-underline [&>svg]:hidden">
               <span className="flex items-center justify-between gap-4">
                 {item.q}
-                <span aria-hidden className="text-muted-foreground transition group-open:rotate-45">
-                  +
-                </span>
               </span>
-            </summary>
-            <p className="mt-2 text-sm text-muted-foreground">{item.a}</p>
-          </details>
+            </AccordionTrigger>
+            <AccordionContent className="pb-0 pt-2 text-sm text-muted-foreground">
+              {item.a}
+            </AccordionContent>
+          </AccordionItem>
         ))}
-      </div>
+      </Accordion>
     </section>
   );
 }
