@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+}
+
 /* Interactive elements get the pointer; disabled controls stay default. */
 button:not(:disabled),
 [role="button"]:not(:disabled),
@@ -24,7 +30,7 @@ label[for] {
   --accent-foreground: #ffffff;
   --destructive: #b42318;
   --destructive-foreground: #ffffff;
-  --border: rgba(31, 27, 22, 0.12);
+  --border: #d1d9e0;
   --input: rgba(31, 27, 22, 0.16);
   --ring: #c94a2c;
   --radius: 0.5rem;
