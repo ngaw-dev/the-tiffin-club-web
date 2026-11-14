@@ -60,6 +60,11 @@ Rules:
   via the shadcn CLI (respecting the project's `components.json` — style,
   aliases, icon library) over hand-rolling primitives. Only build custom
   components when composing/shadcn primitives cannot achieve the design.
+- **Premium blocks first:** before hand-building any page-level section (hero,
+  pricing, dashboard, footer, menu grid, auth screen), search the project's
+  configured registries (e.g., `@shadcnblocks`) and add a block via the CLI
+  (`npx shadcn add @shadcnblocks/<name>`, auth via env key). Custom code is the
+  last resort.
 - Follow the project's configured shadcn conventions: named style, base color,
   CSS variables, and icon library (e.g., lucide) for all icons.
 - Compose screens from these primitives instead of one-off styling.

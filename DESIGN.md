@@ -1,66 +1,93 @@
-# Design System — Living Document
+# Design System — The Tiffin Club (Food Delivery App)
 
 This file is the single source of truth for design decisions. The
 `ux-development` skill keeps it current: read it before designing, append to it
 after.
 
-> Baseline captured from the existing codebase (`app/globals.css`). Update as
-> the system evolves.
-
 ## Brand & Tone
 
-- **Tone:** TBD — decide and record here (e.g., warm/homey vs. minimal/modern).
-- **Users:** TBD — primary personas and contexts.
+- **Product:** on-demand food delivery app (no subscription plans).
+- **Tone:** warm, appetizing, trustworthy. Friendly but not childish. Food
+  photography is the hero; UI stays warm-neutral and lets imagery sell.
+- **Users:** busy professionals & students ordering meals quickly, mostly on
+  mobile. Optimize for fast re-ordering and glanceable info.
 
 ## Design Tokens
 
-### Colors (CSS custom properties, light → dark)
+### Colors
 
-| Token | Light | Dark | Usage |
+Primary palette is warm orange (appetite appeal); fresh green reserved for
+veg indicators. Defined as shadcn CSS variables (`oklch`), light and dark:
+
+| Token | Light (approx) | Dark (approx) | Usage |
 |---|---|---|---|
-| `--background` | `#ffffff` | `#0a0a0a` | Page background |
-| `--foreground` | `#171717` | `#ededed` | Default text |
-
-_To define: primary, secondary, accent, success, warning, danger._
+| `--primary` | orange ~`#EA580C` | brighter orange ~`#FB923C` | CTAs, active states, brand |
+| `--primary-foreground` | white | near-black | Text on primary |
+| `--secondary` | warm brown/neutral | darker warm neutral | Secondary buttons, chips |
+| `--accent` (veg) | green ~`#16A34A` | green ~`#4ADE80` | Veg indicator dots, "open now" |
+| `--destruct` | red | red | Cancelled, errors, non-veg dot |
+| `--success` | green | green | Delivered, order confirmed |
+| `--warning` | amber | amber | Delayed, "closing soon" |
+| `--background` / `--foreground` | warm white / warm near-black | `#0a0a0a` / `#ededed` | Page |
+| `--muted` / `--border` / `--ring` | shadcn `neutral` scale | same scale | Standard chrome |
 
 ### Typography
 
-| Token | Value | Usage |
-|---|---|---|
-| `--font-sans` | `var(--font-geist-sans)` | Body text |
-| `--font-mono` | `var(--font-geist-mono)` | Code / monospace |
-
-_To define: type scale (sizes/weights for h1–h4, body, small, caption)._
+- Geist Sans (already configured); Geist Mono for codes/order IDs.
+- Scale: large appetite-driven display headings for sections, medium card
+  titles, comfortable readable body for menus/descriptions.
 
 ### Spacing & Shape
 
-_To define: base spacing unit and scale, radii, shadows, borders, motion
-durations/easings._
+- Radii: soft — `rounded-lg` (0.75rem) for cards/buttons, `rounded-xl`+ for
+  hero images and modals.
+- Shadows: subtle on meal cards; elevate cart/checkout surfaces.
+- Motion: short (150–200ms) easings; respect `prefers-reduced-motion`.
 
 ## Styling System
 
-- **shadcn/ui is the component library — always use it for building
-  components** (never hand-roll primitives that shadcn provides).
+- **shadcn/ui is the component library — always use it for building components**
+  (never hand-roll primitives shadcn provides).
   - Style: `new-york` · Base color: `neutral` · Icons: `lucide`
   - Aliases: `@/components/ui` (ui), `@/components` (components), `@/lib/utils`,
     `@/hooks`
-  - Extra registry: `@shadcnblocks` (`https://shadcnblocks.com/r/{name}`, needs
-    `SHADCNBLOCKS_API_KEY`)
-- Tailwind CSS (v4, via `@import "tailwindcss"`), tokens mapped through
-  `@theme inline` in `app/globals.css`.
+- **Premium blocks: use https://www.shadcnblocks.com first.** Before hand-building
+  any page-level section (hero, menu grid, pricing, dashboard, footer, auth
+  screens), search `@shadcnblocks` and add via
+  `npx shadcn add @shadcnblocks/<name>` (auth via `SHADCNBLOCKS_API_KEY`).
+  Custom composition only when no suitable block exists.
+- Tailwind CSS v4, tokens mapped through `@theme inline` in `app/globals.css`.
 - Dark mode follows `prefers-color-scheme` via `:root` variable overrides.
+
+## UI Conventions (food delivery)
+
+- **Veg/non-veg:** standard square-outline dot indicators (green = veg,
+  red/brown = non-veg) on every dish card and menu row.
+- **Spice level:** badge or chili icons on dish cards.
+- **Dish cards:** image (with skeleton while loading + fallback), name, price,
+  rating, prep/delivery time, veg dot, add-to-cart button.
+- **Order tracking timeline:** placed → confirmed → preparing → out for
+  delivery → delivered, with status colors (warning → primary → success).
+- **Checkout flow:** cart (Sheet drawer on mobile) → address selection →
+  delivery slot picker → payment → confirmation.
+- **States:** loading skeletons for all food imagery; friendly empty states
+  ("No restaurants open near you yet"); error toasts via Sonner.
+- **Mobile-first:** bottom-friendly CTAs, sticky add-to-cart bar on dish pages.
 
 ## Component Inventory
 
-_Track shadcn components added via the CLI (and any custom compositions), with
-their states (default/hover/focus/disabled/loading/empty/error)._
+_Planned shadcn components:_ Button, Card, Badge, Dialog, Sheet (cart drawer),
+Tabs & Sidebar (menu categories), Sonner (toasts), Skeleton, Avatar,
+Separator, Scroll Area, Form primitives, plus @shadcnblocks sections for
+landing/hero/footer/auth.
 
-_None yet._
+_Add each installed component/block here with its states as it's added._
 
 ## Decision Log
 
-Append: date — decision — rationale.
-
 | Date | Decision | Rationale |
 |---|---|---|
-| 2026-11-14 | Initialized DESIGN.md from existing `globals.css` baseline | Retroactive codification of current state |
+| 2026-11-14 | Initialized DESIGN.md from `globals.css` baseline | Retroactive codification |
+| 2026-11-14 | Primary palette: warm orange | Appetite appeal, energy; green reserved for veg |
+| 2026-11-14 | On-demand ordering only, no subscriptions | Product scope decision |
+| 2026-11-14 | shadcn/ui + @shadcnblocks premium blocks as component source of truth | Consistency, speed, premium quality |
