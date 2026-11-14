@@ -9,7 +9,9 @@ import { toast, Toaster } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { getOrder, getSettings } from "@/lib/api";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { getOrder, getSettings, lookupOrder } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { todayOrders } from "@/lib/order-store";
 import { CancelOrderDialog } from "@/app/(home)/cancel-order-dialog";
@@ -34,6 +36,8 @@ function OrderClient() {
     return urlToken ? [urlToken, ...stored.filter((t) => t !== urlToken)] : stored;
   });
   const [cancelToken, setCancelToken] = useState<string | null>(null);
+  // Orders recovered via manual lookup, shown below stored ones.
+  const [lookupOrders, setLookupOrders] = useState<Order[]>([]);
 
   const ordersQuery = useQuery({
     queryKey: ["orders", tokens],
@@ -58,21 +62,22 @@ function OrderClient() {
     );
   }
 
-  if (!orders.length) {
+  if (!orders.length && !lookupOrders.length) {
     return (
       <div className="mx-auto max-w-xl px-4 py-20 text-center sm:px-6">
         <h1 className="font-display text-2xl font-semibold sm:text-3xl">No order found</h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          We couldn&apos;t find an order on this device. Use{" "}
-          <Link href="/" className="text-primary underline underline-offset-4">
-            find my order
-          </Link>{" "}
-          with your manage token and contact details.
+          We couldn&apos;t find an order on this device. Use the lookup below with
+          your manage token and contact details.
         </p>
         <Toaster richColors position="top-center" />
       </div>
     );
   }
+
+  const allOrders = [...lookupOrders, ...orders].filter(
+    (o, i, arr) => arr.findIndex((x) => x.manage_token === o.manage_token) === i,
+  );
 
   return (
     <div className="mx-auto max-w-xl px-4 pb-16 pt-10 sm:px-6">
@@ -80,13 +85,13 @@ function OrderClient() {
         <div className="rounded-lg border border-border bg-primary/5 p-5 text-center">
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">Order placed!</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            We&apos;ll see you soon{orders[0].name ? `, ${orders[0].name}` : ""}. Pay in person at{" "}
-            {orders[0].fulfilment === "pickup" ? "pickup" : "delivery"}.
+            We&apos;ll see you soon{allOrders[0].name ? `, ${allOrders[0].name}` : ""}. Pay in
+            person at {allOrders[0].fulfilment === "pickup" ? "pickup" : "delivery"}.
           </p>
         </div>
       )}
 
-      {orders.map((order) => (
+      {allOrders.map((order) => (
         <OrderCard
           key={order.manage_token}
           order={order}
@@ -94,6 +99,8 @@ function OrderClient() {
           onCancel={() => setCancelToken(order.manage_token)}
         />
       ))}
+
+      <LookupSection onFound={(o) => setLookupOrders((prev) => [o, ...prev])} />
 
       {cancelToken && (
         <CancelOrderDialog
@@ -181,6 +188,82 @@ function OrderCard({
         >
           Cancel order
           {cutoffTime ? ` (until ${cutoffTime})` : ""}
+        </button>
+      )}
+    </section>
+  );
+}
+
+/** Manual token+contact lookup for orders placed on another device. */
+function LookupSection({ onFound }: { onFound: (o: Order) => void }) {
+  const [token, setToken] = useState("");
+  const [contact, setContact] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const isEmail = contact.includes("@");
+      const found = await lookupOrder({
+        token,
+        email: isEmail ? contact : undefined,
+        phone: isEmail ? undefined : contact,
+      });
+      onFound(found);
+      setOpen(false);
+      setToken("");
+      setContact("");
+    } catch {
+      toast.error("No order found for those details.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="mt-10">
+      {open ? (
+        <form onSubmit={submit} className="space-y-4 border border-border bg-card p-6">
+          <h2 className="font-display text-lg font-semibold">Ordered on another device?</h2>
+          <p className="text-sm text-muted-foreground">
+            Enter the manage token from your confirmation plus the email or phone you used.
+          </p>
+          <div className="space-y-1.5">
+            <Label htmlFor="lookup-token">Manage token</Label>
+            <Input
+              id="lookup-token"
+              required
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="lookup-contact">Email or phone</Label>
+            <Input
+              id="lookup-contact"
+              required
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button type="submit" disabled={busy}>
+              {busy ? "Looking up…" : "Find order"}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={busy}>
+              Close
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+        >
+          Ordered on another device? Find your order
         </button>
       )}
     </section>
