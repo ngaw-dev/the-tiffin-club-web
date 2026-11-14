@@ -115,7 +115,8 @@ export default function CheckoutPage() {
           className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-primary px-6 py-2.5 font-semibold text-primary-foreground transition hover:opacity-90 active:scale-[0.98]"
         >
           View today&apos;s menu
-        </Link>        <Toaster richColors position="top-center" />
+        </Link>{" "}
+        <Toaster richColors position="top-center" />
       </div>
     );
   }
@@ -224,10 +225,7 @@ export default function CheckoutPage() {
                     value={form.suburb || undefined}
                     onValueChange={(v) => set("suburb")(v)}
                   >
-                    <SelectTrigger
-                      id="suburb"
-                      className="mt-1.5 min-h-11 w-full rounded-lg px-3.5"
-                    >
+                    <SelectTrigger id="suburb" className="mt-1.5 min-h-11 w-full rounded-lg px-3.5">
                       <SelectValue placeholder="Choose your suburb" />
                     </SelectTrigger>
                     <SelectContent>

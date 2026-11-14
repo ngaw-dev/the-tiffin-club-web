@@ -9,7 +9,11 @@ export function Faq({ windowLabel }: { windowLabel: string | null }) {
   return (
     <section id="faq" className="scroll-mt-24 pb-16">
       <h2 className="font-display text-2xl font-semibold sm:text-3xl">Common questions</h2>
-      <Accordion type="single" collapsible className="mt-6 divide-y divide-border border border-border bg-card">
+      <Accordion
+        type="single"
+        collapsible
+        className="mt-6 divide-y divide-border border border-border bg-card"
+      >
         {[
           ...(windowLabel
             ? [
@@ -34,9 +38,7 @@ export function Faq({ windowLabel }: { windowLabel: string | null }) {
         ].map((item) => (
           <AccordionItem key={item.q} value={item.q} className="border-0 px-6 py-4">
             <AccordionTrigger className="py-0 font-medium hover:no-underline [&>svg]:hidden">
-              <span className="flex items-center justify-between gap-4">
-                {item.q}
-              </span>
+              <span className="flex items-center justify-between gap-4">{item.q}</span>
             </AccordionTrigger>
             <AccordionContent className="pb-0 pt-2 text-sm text-muted-foreground">
               {item.a}

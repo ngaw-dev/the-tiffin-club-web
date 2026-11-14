@@ -78,8 +78,8 @@ function OrderClient() {
       <div className="mx-auto max-w-xl px-4 py-20 text-center sm:px-6">
         <h1 className="font-display text-2xl font-semibold sm:text-3xl">No order found</h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          We couldn&apos;t find an order on this device. Use the lookup below with
-          your manage token and contact details.
+          We couldn&apos;t find an order on this device. Use the lookup below with your manage token
+          and contact details.
         </p>
         <Toaster richColors position="top-center" />
       </div>
@@ -159,51 +159,50 @@ function OrderCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 pt-4">
-
-      <dl className="mt-4 space-y-1 text-sm">
-        <div className="flex justify-between">
-          <dt className="text-muted-foreground">Fulfilment</dt>
-          <dd className="capitalize">{order.fulfilment}</dd>
-        </div>
-        {order.suburb ? (
+        <dl className="mt-4 space-y-1 text-sm">
           <div className="flex justify-between">
-            <dt className="text-muted-foreground">Suburb</dt>
-            <dd>{order.suburb}</dd>
+            <dt className="text-muted-foreground">Fulfilment</dt>
+            <dd className="capitalize">{order.fulfilment}</dd>
           </div>
-        ) : null}
-        <div className="flex justify-between gap-3">
-          <dt className="text-muted-foreground">Manage token</dt>
-          <dd className="font-mono text-xs text-wrap">{order.manage_token}</dd>
+          {order.suburb ? (
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Suburb</dt>
+              <dd>{order.suburb}</dd>
+            </div>
+          ) : null}
+          <div className="flex justify-between gap-3">
+            <dt className="text-muted-foreground">Manage token</dt>
+            <dd className="font-mono text-xs text-wrap">{order.manage_token}</dd>
+          </div>
+        </dl>
+
+        <Separator className="my-4" />
+        <ul className="space-y-2 text-sm">
+          {order.items.map((it, i) => (
+            <li key={i} className="flex justify-between">
+              <span>
+                {it.quantity} × {it.name}
+              </span>
+              <span className="ttc-num">{formatMoney(it.unit_price * it.quantity)}</span>
+            </li>
+          ))}
+        </ul>
+        <Separator className="my-4" />
+        <div className="flex justify-between font-semibold">
+          <span>Total (pay in person)</span>
+          <span className="ttc-num">{formatMoney(order.total)}</span>
         </div>
-      </dl>
 
-      <Separator className="my-4" />
-      <ul className="space-y-2 text-sm">
-        {order.items.map((it, i) => (
-          <li key={i} className="flex justify-between">
-            <span>
-              {it.quantity} × {it.name}
-            </span>
-            <span className="ttc-num">{formatMoney(it.unit_price * it.quantity)}</span>
-          </li>
-        ))}
-      </ul>
-      <Separator className="my-4" />
-      <div className="flex justify-between font-semibold">
-        <span>Total (pay in person)</span>
-        <span className="ttc-num">{formatMoney(order.total)}</span>
-      </div>
-
-      {!cancelled && !expired && (
-        <Button
-          variant="link"
-          onClick={onCancel}
-          className="mt-5 min-h-11 px-0 text-sm font-normal text-muted-foreground underline-offset-4 hover:text-destructive"
-        >
-          Cancel order
-          {cutoffTime ? ` (until ${cutoffTime})` : ""}
-        </Button>
-      )}
+        {!cancelled && !expired && (
+          <Button
+            variant="link"
+            onClick={onCancel}
+            className="mt-5 min-h-11 px-0 text-sm font-normal text-muted-foreground underline-offset-4 hover:text-destructive"
+          >
+            Cancel order
+            {cutoffTime ? ` (until ${cutoffTime})` : ""}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
@@ -243,44 +242,44 @@ function LookupSection({ onFound }: { onFound: (o: Order) => void }) {
         <form onSubmit={submit} className="space-y-4">
           <Card className="rounded-lg">
             <CardContent className="p-6">
-          <h2 className="font-display text-lg font-semibold">Ordered on another device?</h2>
-          <p className="text-sm text-muted-foreground">
-            Enter the manage token from your confirmation plus the email or phone you used.
-          </p>
-          <div className="space-y-1.5">
-            <Label htmlFor="lookup-token">Manage token</Label>
-            <Input
-              id="lookup-token"
-              required
-              className="min-h-11 rounded-lg px-3.5"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="lookup-contact">Email or phone</Label>
-            <Input
-              id="lookup-contact"
-              required
-              className="min-h-11 rounded-lg px-3.5"
-              value={contact}
-              onChange={(e) => setContact(e.target.value)}
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button type="submit" className="min-h-11" disabled={busy}>
-              {busy ? "Looking up…" : "Find order"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="min-h-11"
-              onClick={() => setOpen(false)}
-              disabled={busy}
-            >
-              Close
-            </Button>
-          </div>
+              <h2 className="font-display text-lg font-semibold">Ordered on another device?</h2>
+              <p className="text-sm text-muted-foreground">
+                Enter the manage token from your confirmation plus the email or phone you used.
+              </p>
+              <div className="space-y-1.5">
+                <Label htmlFor="lookup-token">Manage token</Label>
+                <Input
+                  id="lookup-token"
+                  required
+                  className="min-h-11 rounded-lg px-3.5"
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="lookup-contact">Email or phone</Label>
+                <Input
+                  id="lookup-contact"
+                  required
+                  className="min-h-11 rounded-lg px-3.5"
+                  value={contact}
+                  onChange={(e) => setContact(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button type="submit" className="min-h-11" disabled={busy}>
+                  {busy ? "Looking up…" : "Find order"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="min-h-11"
+                  onClick={() => setOpen(false)}
+                  disabled={busy}
+                >
+                  Close
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </form>
