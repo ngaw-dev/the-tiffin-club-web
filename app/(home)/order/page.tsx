@@ -80,7 +80,7 @@ function OrderClient() {
   );
 
   return (
-    <div className="mx-auto max-w-xl px-4 pb-16 pt-10 sm:px-6">
+    <div className="mx-auto max-w-2xl px-4 pb-16 pt-10 sm:px-6">
       {placed && (
         <div className="rounded-lg border border-border bg-primary/5 p-5 text-center">
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">Order placed!</h1>
@@ -159,7 +159,7 @@ function OrderCard({
         ) : null}
         <div className="flex justify-between gap-3">
           <dt className="text-muted-foreground">Manage token</dt>
-          <dd className="font-mono">{order.manage_token}</dd>
+          <dd className="font-mono text-xs text-wrap">{order.manage_token}</dd>
         </div>
       </dl>
 

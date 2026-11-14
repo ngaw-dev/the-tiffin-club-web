@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Interactive elements get the pointer; disabled controls stay default. */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+select,
+summary,
+label[for] {
+  cursor: pointer;
+}
+
 :root {
   --background: #faf7f2;
   --foreground: #1f1b16;

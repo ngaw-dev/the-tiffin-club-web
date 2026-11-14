@@ -26,7 +26,7 @@ export function Faq({ windowLabel }: { windowLabel: string | null }) {
           },
         ].map((item) => (
           <details key={item.q} className="group px-6 py-4">
-            <summary className="cursor-pointer list-none font-medium marker:hidden">
+            <summary className="list-none font-medium marker:hidden">
               <span className="flex items-center justify-between gap-4">
                 {item.q}
                 <span aria-hidden className="text-muted-foreground transition group-open:rotate-45">
