@@ -29,13 +29,13 @@ export function SiteHeader() {
         <nav className="flex items-center gap-1 sm:gap-2" aria-label="Main">
           <Link
             href="/#how-it-works"
-            className="hidden rounded-lg px-3 py-2 text-sm font-medium underline-offset-4 hover:underline sm:block"
+            className="hidden rounded-lg px-3 py-2 text-sm font-medium underline-offset-4 text-primary hover:underline sm:block"
           >
             How it works
           </Link>
           <Link
             href="/#faq"
-            className="hidden rounded-lg px-3 py-2 text-sm font-medium underline-offset-4 hover:underline sm:block"
+            className="hidden rounded-lg px-3 py-2 text-sm font-medium underline-offset-4 text-primary hover:underline sm:block"
           >
             FAQ
           </Link>
