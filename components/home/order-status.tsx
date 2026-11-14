@@ -12,130 +12,20 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { cancelOrder, getOrder, lookupOrder } from "@/lib/api";
+import { Separator } from "@/components/ui/separator";
+import { cancelOrder, lookupOrder } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import type { Order } from "@/lib/types";
 
-export function OrderStatusDialog({
-  order: initialOrder,
-  onClose,
-}: {
-  order: Order | null;
-  onClose: () => void;
-}) {
-  const [order, setOrder] = useState<Order | null>(initialOrder);
-  const [token, setToken] = useState("");
-  const [contact, setContact] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  const open = order !== null;
-
-  async function doLookup(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    try {
-      const isEmail = contact.includes("@");
-      const found = await lookupOrder({
-        token,
-        email: isEmail ? contact : undefined,
-        phone: isEmail ? undefined : contact,
-      });
-      setOrder(found);
-    } catch {
-      toast.error("No order found for those details.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function doCancel() {
-    if (!order || busy) return;
-    setBusy(true);
-    try {
-      const updated = await cancelOrder(order.manage_token);
-      setOrder(updated);
-      toast.success("Order cancelled.");
-    } catch {
-      toast.error("Could not cancel — the cutoff may have passed.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  if (!order) return null;
-
-  return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            Your order
-            <Badge variant={order.status === "cancelled" ? "destructive" : "default"}>
-              {order.status}
-            </Badge>
-          </DialogTitle>
-          <DialogDescription>
-            Save this link to manage your order until the cutoff — pay in person.
-          </DialogDescription>
-        </DialogHeader>
-
-        <dl className="space-y-1 text-sm">
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">Fulfilment</dt>
-            <dd className="capitalize">{order.fulfilment}</dd>
-          </div>
-          {order.suburb ? (
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Suburb</dt>
-              <dd>{order.suburb}</dd>
-            </div>
-          ) : null}
-        </dl>
-
-        <Separator />
-
-        <ul className="space-y-2 text-sm">
-          {order.items.map((it, i) => (
-            <li key={i} className="flex justify-between">
-              <span>
-                {it.quantity} × {it.name}
-              </span>
-              <span className="tabular-nums">
-                {formatMoney(it.unit_price * it.quantity)}
-              </span>
-            </li>
-          ))}
-        </ul>
-
-        <Separator />
-
-        <div className="flex justify-between font-medium">
-          <span>Total (pay in person)</span>
-          <span className="tabular-nums">{formatMoney(order.total)}</span>
-        </div>
-
-        {order.status !== "cancelled" ? (
-          <Button variant="outline" onClick={doCancel} disabled={busy}>
-            Cancel order
-          </Button>
-        ) : null}
-
-        <p className="break-all text-xs text-muted-foreground">
-          Manage token: {order.manage_token}
-        </p>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-export function FindOrderButton() {
+/** Compact header link + dialog for finding an existing order. */
+export function FindOrderLink() {
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
   const [contact, setContact] = useState("");
   const [busy, setBusy] = useState(false);
   const [order, setOrder] = useState<Order | null>(null);
+  const [statusOpen, setStatusOpen] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -149,6 +39,7 @@ export function FindOrderButton() {
       });
       setOrder(found);
       setOpen(false);
+      setStatusOpen(true);
     } catch {
       toast.error("No order found for those details.");
     } finally {
@@ -158,9 +49,13 @@ export function FindOrderButton() {
 
   return (
     <>
-      <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="rounded-lg px-3 py-2 text-sm font-medium underline-offset-4 hover:underline"
+      >
         Find my order
-      </Button>
+      </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
@@ -185,15 +80,99 @@ export function FindOrderButton() {
           </form>
         </DialogContent>
       </Dialog>
-      <OrderStatusDialog order={order} onClose={() => setOrder(null)} />
+      <OrderStatusDialog
+        order={order}
+        open={statusOpen}
+        onOpenChange={setStatusOpen}
+      />
     </>
   );
 }
 
-export async function fetchOrder(token: string): Promise<Order | null> {
-  try {
-    return await getOrder(token);
-  } catch {
-    return null;
+export function OrderStatusDialog({
+  order,
+  open,
+  onOpenChange,
+}: {
+  order: Order | null;
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+}) {
+  const [current, setCurrent] = useState<Order | null>(order);
+  const [busy, setBusy] = useState(false);
+
+  const shown = current ?? order;
+  if (!shown) return null;
+
+  async function doCancel() {
+    setBusy(true);
+    try {
+      const updated = await cancelOrder(shown!.manage_token);
+      setCurrent(updated);
+      toast.success("Order cancelled.");
+    } catch {
+      toast.error("Could not cancel — the cutoff may have passed.");
+    } finally {
+      setBusy(false);
+    }
   }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            Your order
+            <Badge variant={shown.status === "cancelled" ? "destructive" : "secondary"}>
+              {shown.status}
+            </Badge>
+          </DialogTitle>
+          <DialogDescription>
+            Pay in person — this link manages your order until the cutoff.
+          </DialogDescription>
+        </DialogHeader>
+
+        <dl className="space-y-1 text-sm">
+          <div className="flex justify-between">
+            <dt className="text-muted-foreground">Fulfilment</dt>
+            <dd className="capitalize">{shown.fulfilment}</dd>
+          </div>
+          {shown.suburb ? (
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Suburb</dt>
+              <dd>{shown.suburb}</dd>
+            </div>
+          ) : null}
+        </dl>
+
+        <Separator />
+
+        <ul className="space-y-2 text-sm">
+          {shown.items.map((it, i) => (
+            <li key={i} className="flex justify-between">
+              <span>
+                {it.quantity} × {it.name}
+              </span>
+              <span className="ttc-num">
+                {formatMoney(it.unit_price * it.quantity)}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <Separator />
+
+        <div className="flex justify-between font-semibold">
+          <span>Total (pay in person)</span>
+          <span className="ttc-num">{formatMoney(shown.total)}</span>
+        </div>
+
+        {shown.status !== "cancelled" ? (
+          <Button variant="outline" onClick={doCancel} disabled={busy}>
+            Cancel order
+          </Button>
+        ) : null}
+      </DialogContent>
+    </Dialog>
+  );
 }

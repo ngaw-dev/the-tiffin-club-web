@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,9 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { login, register, getPrefill } from "@/lib/api";
-import type { AccountPrefill } from "@/lib/types";
+import { getPrefill, login, register } from "@/lib/api";
 
 const STORAGE_KEY = "tiffin-club-token";
 
@@ -34,7 +33,7 @@ export function usePrefill() {
   });
 }
 
-export function SignInButton() {
+export function SignInLink() {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({ email: "", password: "", password_confirmation: "" });
@@ -46,7 +45,7 @@ export function SignInButton() {
   async function finish(token: string) {
     localStorage.setItem(STORAGE_KEY, token);
     await queryClient.invalidateQueries({ queryKey: ["account", "prefill"] });
-    toast.success("Signed in — your details are prefilled.");
+    toast.success("Signed in — your details are prefilled at checkout.");
     setOpen(false);
   }
 
@@ -82,9 +81,13 @@ export function SignInButton() {
 
   return (
     <>
-      <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="rounded-lg px-3 py-2 text-sm font-medium underline-offset-4 hover:underline"
+      >
         Sign in
-      </Button>
+      </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
