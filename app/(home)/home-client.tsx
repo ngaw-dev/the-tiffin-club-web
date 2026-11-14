@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { formatMoney, formatTime } from "@/lib/format";
@@ -9,14 +8,13 @@ import { contactFromSettings } from "@/lib/brand";
 import { useCart } from "@/lib/cart-context";
 import { OrderingStateBadge } from "@/app/(home)/ordering-state-badge";
 import { ClosingSoonCountdown } from "@/app/(home)/closing-soon-countdown";
-import { CheckoutSheet } from "@/app/(home)/checkout-sheet";
-import { OrderStatusDialog } from "@/app/(home)/order-status";
-import { usePrefill } from "@/app/(home)/sign-in";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { Hero } from "@/app/(home)/blocks/hero";
 import { HowItWorks } from "@/app/(home)/blocks/how-it-works";
 import { Faq } from "@/app/(home)/blocks/faq";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { MenuItem, Order } from "@/lib/types";
+import type { MenuItem } from "@/lib/types";
 
 // Stand-in photographs (to be replaced with the kitchen's own photos)
 const MENU_IMG =
@@ -24,8 +22,6 @@ const MENU_IMG =
 
 export function HomeClient() {
   const { lines, total, setQuantity } = useCart();
-  const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
-  const [statusOpen, setStatusOpen] = useState(false);
 
   const menuQuery = useQuery({
     queryKey: ["menu", "today"],
@@ -35,8 +31,6 @@ export function HomeClient() {
     queryKey: ["settings"],
     queryFn: getSettings,
   });
-  const { data: prefill } = usePrefill();
-
   const menu = menuQuery.data ?? null;
   const settings = settingsQuery.data ?? null;
   const contact = contactFromSettings(settings);
@@ -52,11 +46,6 @@ export function HomeClient() {
     (item, i) => ({ ...item, id: i + 1 }), // positional ids per order API
   );
   const [mainItem, ...extras] = dishes;
-
-  const onPlaced = (order: Order) => {
-    setPlacedOrder(order);
-    setStatusOpen(true);
-  };
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6">
@@ -163,7 +152,7 @@ export function HomeClient() {
                       </div>
                       <QuantityStepper
                         value={lines.find((l) => l.item.id === mainItem.id)?.quantity ?? 0}
-                        onChange={(q) => setQuantity(mainItem.id, q)}
+                        onChange={(q) => setQuantity(mainItem, q)}
                         disabled={!orderable}
                         label={`Quantity of ${mainItem.name}`}
                       />
@@ -193,7 +182,7 @@ export function HomeClient() {
                           </div>
                           <QuantityStepper
                             value={lines.find((l) => l.item.id === extra.id)?.quantity ?? 0}
-                            onChange={(q) => setQuantity(extra.id, q)}
+                            onChange={(q) => setQuantity(extra, q)}
                             disabled={!orderable}
                             label={`Quantity of ${extra.name}`}
                           />
@@ -242,16 +231,20 @@ export function HomeClient() {
                 </div>
               )}
 
-              {settings && (
-                <div className="mt-5">
-                  <CheckoutSheet
-                    settings={settings}
-                    orderingOpen={!!orderable}
-                    prefill={prefill ?? undefined}
-                    onPlaced={onPlaced}
-                  />
-                </div>
-              )}
+              {settings &&
+                (lines.length && orderable ? (
+                  <div className="mt-5">
+                    <Button asChild size="lg" className="w-full">
+                      <Link href="/checkout">Checkout · {formatMoney(total)}</Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="mt-5">
+                    <Button size="lg" className="w-full" disabled>
+                      {orderable ? "Cart is empty" : "Ordering closed"}
+                    </Button>
+                  </div>
+                ))}
               {!orderable && lines.length > 0 && (
                 <p className="mt-2 text-xs text-muted-foreground">
                   Checkout is available while ordering is open
@@ -269,7 +262,6 @@ export function HomeClient() {
       {/* FAQ */}
       <Faq windowLabel={windowLabel} />
 
-      <OrderStatusDialog order={placedOrder} open={statusOpen} onOpenChange={setStatusOpen} />
       <Toaster richColors position="top-center" />
     </div>
   );

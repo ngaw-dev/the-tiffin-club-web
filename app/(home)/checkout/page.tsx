@@ -1,17 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { toast, Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -23,38 +16,47 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Minus, Plus, ShoppingBag } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
+import { getSettings, ApiError, placeOrder } from "@/lib/api";
 import { useCart } from "@/lib/cart-context";
-import { ApiError, placeOrder } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
-import type { Fulfilment, Order, StoreSettings } from "@/lib/types";
+import { usePrefill } from "@/app/(home)/sign-in";
+import { OrderStatusDialog } from "@/app/(home)/order-status";
+import type { Fulfilment, Order } from "@/lib/types";
 
-interface CheckoutSheetProps {
-  settings: StoreSettings;
-  orderingOpen: boolean;
-  prefill?: {
-    name: string | null;
-    phone: string | null;
-    email: string | null;
-    address: string | null;
-    suburb: string | null;
-  };
-  onPlaced: (order: Order) => void;
-}
-
-export function CheckoutSheet({ settings, orderingOpen, prefill, onPlaced }: CheckoutSheetProps) {
+export default function CheckoutPage() {
   const { lines, total, setQuantity, clear, toPayload } = useCart();
-  const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [fulfilment, setFulfilment] = useState<Fulfilment>("pickup");
+  const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
+  const [statusOpen, setStatusOpen] = useState(false);
+
+  const settingsQuery = useQuery({ queryKey: ["settings"], queryFn: getSettings });
+  const settings = settingsQuery.data ?? null;
+  const { data: prefill } = usePrefill();
+
   const [form, setForm] = useState({
-    name: prefill?.name ?? "",
-    email: prefill?.email ?? "",
-    phone: prefill?.phone ?? "",
-    address: prefill?.address ?? "",
-    suburb:
-      prefill?.suburb && settings.delivery_suburbs.includes(prefill.suburb) ? prefill.suburb : "",
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    suburb: "",
   });
+  const [prefilled, setPrefilled] = useState(false);
+  if (prefill && !prefilled) {
+    setPrefilled(true);
+    setForm((f) => ({
+      ...f,
+      name: prefill.name ?? f.name,
+      email: prefill.email ?? f.email,
+      phone: prefill.phone ?? f.phone,
+      address: prefill.address ?? f.address,
+      suburb:
+        settings && prefill.suburb && settings.delivery_suburbs.includes(prefill.suburb)
+          ? prefill.suburb
+          : f.suburb,
+    }));
+  }
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const set = (k: keyof typeof form) => (v: string) => {
@@ -78,8 +80,8 @@ export function CheckoutSheet({ settings, orderingOpen, prefill, onPlaced }: Che
       });
       toast.success("Order placed! We'll see you soon.");
       clear();
-      setOpen(false);
-      onPlaced(order);
+      setPlacedOrder(order);
+      setStatusOpen(true);
     } catch (err) {
       const apiErr = err instanceof ApiError ? err : null;
       if (apiErr?.status === 422 && apiErr.ordering) {
@@ -98,61 +100,36 @@ export function CheckoutSheet({ settings, orderingOpen, prefill, onPlaced }: Che
   const err = (k: string) =>
     fieldErrors[k] ? <p className="text-sm text-destructive">{fieldErrors[k]}</p> : null;
 
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button size="lg" className="w-full gap-2" disabled={!lines.length || !orderingOpen}>
-          <ShoppingBag className="h-4 w-4" aria-hidden />
-          {orderingOpen
-            ? lines.length
-              ? `Checkout · ${formatMoney(total)}`
-              : "Cart is empty"
-            : "Ordering closed"}
+  if (!lines.length) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6">
+        <h1 className="font-display text-3xl font-semibold">Your tiffin is empty</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Add the main meal and any extras from today&apos;s menu.
+        </p>
+        <Button asChild size="lg" className="mt-6">
+          <Link href="/">Back to today&apos;s menu</Link>
         </Button>
-      </SheetTrigger>
-      <SheetContent side="right" className="flex w-full flex-col overflow-y-auto sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle>Checkout</SheetTitle>
-          <SheetDescription>Pay in person when you collect or receive your order.</SheetDescription>
-        </SheetHeader>
+        <OrderStatusDialog order={placedOrder} open={statusOpen} onOpenChange={setStatusOpen} />
+        <Toaster richColors position="top-center" />
+      </div>
+    );
+  }
 
-        <form onSubmit={submit} className="flex flex-1 flex-col gap-4 px-4">
-          {/* Cart lines */}
-          <ul className="space-y-3">
-            {lines.map(({ item, quantity }) => (
-              <li key={item.id} className="flex items-center justify-between gap-3 text-sm">
-                <div className="min-w-0">
-                  <p className="font-medium">{item.name}</p>
-                  <p className="text-muted-foreground">{formatMoney(item.price)} each</p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Button
-                    type="button"
-                    size="icon-sm"
-                    variant="outline"
-                    aria-label={`Remove one ${item.name}`}
-                    onClick={() => setQuantity(item.id, quantity - 1)}
-                  >
-                    <Minus className="h-4 w-4" aria-hidden />
-                  </Button>
-                  <span className="w-8 text-center tabular-nums">{quantity}</span>
-                  <Button
-                    type="button"
-                    size="icon-sm"
-                    variant="outline"
-                    aria-label={`Add one ${item.name}`}
-                    disabled={quantity >= 20}
-                    onClick={() => setQuantity(item.id, quantity + 1)}
-                  >
-                    <Plus className="h-4 w-4" aria-hidden />
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
+  return (
+    <div className="mx-auto max-w-5xl px-4 sm:px-6">
+      <div className="flex items-baseline justify-between gap-4 py-8">
+        <h1 className="font-display text-3xl font-semibold">Checkout</h1>
+        <Link
+          href="/"
+          className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+        >
+          ← Back to menu
+        </Link>
+      </div>
 
-          <Separator />
-
+      <div className="grid gap-8 pb-16 lg:grid-cols-[1fr_360px]">
+        <form onSubmit={submit} className="space-y-6" id="checkout-form">
           {/* Fulfilment */}
           <div className="space-y-2">
             <Label>Fulfilment</Label>
@@ -174,7 +151,7 @@ export function CheckoutSheet({ settings, orderingOpen, prefill, onPlaced }: Che
                 </Label>
               </div>
             </RadioGroup>
-            {fulfilment === "pickup" && settings.pickup_start_time ? (
+            {fulfilment === "pickup" && settings?.pickup_start_time ? (
               <p className="text-sm text-muted-foreground">
                 Pickup window: {settings.pickup_start_time}–{settings.pickup_end_time}
               </p>
@@ -239,7 +216,7 @@ export function CheckoutSheet({ settings, orderingOpen, prefill, onPlaced }: Che
                     <SelectValue placeholder="Choose your suburb" />
                   </SelectTrigger>
                   <SelectContent>
-                    {settings.delivery_suburbs.map((s) => (
+                    {settings?.delivery_suburbs.map((s) => (
                       <SelectItem key={s} value={s}>
                         {s}
                       </SelectItem>
@@ -250,26 +227,65 @@ export function CheckoutSheet({ settings, orderingOpen, prefill, onPlaced }: Che
               </div>
             </>
           ) : null}
-
-          <div className="mt-auto" />
         </form>
 
-        <SheetFooter className="mt-4">
-          <div className="flex w-full items-center justify-between text-sm font-medium">
+        {/* Order summary */}
+        <aside className="h-fit border border-border bg-card p-6 lg:sticky lg:top-24">
+          <h2 className="font-display text-lg font-semibold">Your tiffin</h2>
+          <ul className="mt-3 space-y-3">
+            {lines.map(({ item, quantity }) => (
+              <li key={item.id} className="flex items-center justify-between gap-3 text-sm">
+                <div className="min-w-0">
+                  <p className="font-medium">{item.name}</p>
+                  <p className="text-muted-foreground">{formatMoney(item.price)} each</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    variant="outline"
+                    aria-label={`Remove one ${item.name}`}
+                    onClick={() => setQuantity(item, quantity - 1)}
+                  >
+                    <Minus className="h-4 w-4" aria-hidden />
+                  </Button>
+                  <span className="w-8 text-center tabular-nums">{quantity}</span>
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    variant="outline"
+                    aria-label={`Add one ${item.name}`}
+                    disabled={quantity >= 20}
+                    onClick={() => setQuantity(item, quantity + 1)}
+                  >
+                    <Plus className="h-4 w-4" aria-hidden />
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <Separator className="my-4" />
+
+          <div className="flex items-center justify-between text-sm font-medium">
             <span>Total (pay in person)</span>
             <span className="tabular-nums">{formatMoney(total)}</span>
           </div>
+
           <Button
             type="submit"
             size="lg"
-            className="w-full"
-            disabled={submitting || !lines.length}
-            onClick={submit as unknown as React.MouseEventHandler}
+            className="mt-4 w-full"
+            form="checkout-form"
+            disabled={submitting}
           >
             {submitting ? "Placing order…" : `Place order · ${formatMoney(total)}`}
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </aside>
+      </div>
+
+      <OrderStatusDialog order={placedOrder} open={statusOpen} onOpenChange={setStatusOpen} />
+      <Toaster richColors position="top-center" />
+    </div>
   );
 }

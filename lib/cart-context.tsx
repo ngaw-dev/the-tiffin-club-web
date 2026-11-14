@@ -11,7 +11,7 @@ export interface CartLine {
 interface CartContextValue {
   lines: CartLine[];
   addItem: (item: MenuItem, quantity?: number) => void;
-  setQuantity: (itemId: number, quantity: number) => void;
+  setQuantity: (item: MenuItem, quantity: number) => void;
   removeItem: (itemId: number) => void;
   clear: () => void;
   count: number;
@@ -24,14 +24,17 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
 
-  const setQuantity = useCallback((itemId: number, quantity: number) => {
-    setLines((prev) =>
-      prev.flatMap((l) => {
-        if (l.item.id !== itemId) return [l];
-        const next = Math.max(0, Math.min(20, quantity)); // API limit 1–20
-        return next === 0 ? [] : [{ ...l, quantity: next }];
-      }),
-    );
+  const setQuantity = useCallback((item: MenuItem, quantity: number) => {
+    setLines((prev) => {
+      const next = Math.max(0, Math.min(20, quantity)); // API limit 1–20
+      const existing = prev.find((l) => l.item.id === item.id);
+      if (!existing) {
+        return next > 0 ? [...prev, { item, quantity: next }] : prev;
+      }
+      return next === 0
+        ? prev.filter((l) => l.item.id !== item.id)
+        : prev.map((l) => (l.item.id === item.id ? { ...l, quantity: next } : l));
+    });
   }, []);
 
   const addItem = useCallback((item: MenuItem, quantity = 1) => {
