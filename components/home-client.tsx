@@ -13,7 +13,7 @@ import { SignInButton, getToken } from "@/components/sign-in";
 import { getPrefill } from "@/lib/api";
 import { formatMoney, formatTime } from "@/lib/format";
 import { useCart } from "@/lib/cart-context";
-import type { AccountPrefill, Order, StoreSettings, TodayMenu } from "@/lib/types";
+import type { AccountPrefill, MenuItem, Order, StoreSettings, TodayMenu } from "@/lib/types";
 
 interface HomeClientProps {
   menu: TodayMenu | null;
@@ -35,10 +35,10 @@ export function HomeClient({ menu, settings }: HomeClientProps) {
 
   const orderingOpen = menu?.ordering.state === "open" || menu?.ordering.state === "closing_soon";
 
-  const dishes = useMemo(
-    () => (menu?.main ? [menu.main, ...menu.extras] : menu?.extras ?? []),
-    [menu],
-  );
+  const dishes = useMemo(() => {
+    const withId = (menu?.main ? [menu.main, ...menu.extras] : menu?.extras ?? []) as MenuItem[];
+    return withId.map((item, i) => ({ ...item, id: i + 1 })); // positional ids per order API
+  }, [menu]);
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
