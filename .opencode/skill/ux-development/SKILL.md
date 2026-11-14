@@ -78,6 +78,12 @@ Rules:
 
 ## 4. Accessibility (non-negotiable)
 
+- **No modals/dialogs/sheets/popovers by default.** Prefer dedicated pages,
+  routes, or inline expandable sections. Only use an overlay when the user
+  explicitly asks for one (e.g., "put this in a modal"), and confirm if unsure.
+  This applies to confirmations, forms, detail views, and "success" states —
+  route to a page instead.
+
 - Semantic HTML first (`button` for actions, `a` for navigation, proper
   heading hierarchy, landmarks).
 - Full keyboard operability; visible `:focus-visible` styling.

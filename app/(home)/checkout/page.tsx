@@ -2,37 +2,28 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { toast, Toaster } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Minus, Plus } from "lucide-react";
-import { getSettings, ApiError, placeOrder } from "@/lib/api";
+import { getSettings, getTodayMenu } from "@/lib/api";
+import { ApiError, placeOrder } from "@/lib/api";
 import { useCart } from "@/lib/cart-context";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, formatTime } from "@/lib/format";
 import { usePrefill } from "@/app/(home)/sign-in";
-import { OrderStatusDialog } from "@/app/(home)/order-status";
-import type { Fulfilment, Order } from "@/lib/types";
+import type { Fulfilment } from "@/lib/types";
 
 export default function CheckoutPage() {
+  const router = useRouter();
   const { lines, total, setQuantity, clear, toPayload } = useCart();
   const [submitting, setSubmitting] = useState(false);
   const [fulfilment, setFulfilment] = useState<Fulfilment>("pickup");
-  const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
-  const [statusOpen, setStatusOpen] = useState(false);
 
   const settingsQuery = useQuery({ queryKey: ["settings"], queryFn: getSettings });
   const settings = settingsQuery.data ?? null;
+  const menuQuery = useQuery({ queryKey: ["menu", "today"], queryFn: getTodayMenu });
+  const ordering = menuQuery.data?.ordering ?? null;
+  const orderable = ordering?.state === "open" || ordering?.state === "closing_soon";
+
   const { data: prefill } = usePrefill();
 
   const [form, setForm] = useState({
@@ -80,8 +71,19 @@ export default function CheckoutPage() {
       });
       toast.success("Order placed! We'll see you soon.");
       clear();
-      setPlacedOrder(order);
-      setStatusOpen(true);
+      const items = order.items
+        .map((it) => `${it.quantity}~${it.name}~${it.unit_price * it.quantity}`)
+        .join(";");
+      const qs = new URLSearchParams({
+        token: order.manage_token,
+        fulfilment: order.fulfilment,
+        total: String(order.total),
+        items,
+        placed: "1",
+      });
+      if (order.name) qs.set("name", order.name);
+      if (order.suburb) qs.set("suburb", order.suburb);
+      router.push(`/order?${qs.toString()}`);
     } catch (err) {
       const apiErr = err instanceof ApiError ? err : null;
       if (apiErr?.status === 422 && apiErr.ordering) {
@@ -98,194 +100,351 @@ export default function CheckoutPage() {
   }
 
   const err = (k: string) =>
-    fieldErrors[k] ? <p className="text-sm text-destructive">{fieldErrors[k]}</p> : null;
+    fieldErrors[k] ? <p className="mt-1 text-sm text-destructive">{fieldErrors[k]}</p> : null;
+
+  const inputCls =
+    "mt-1.5 min-h-11 w-full rounded-lg border border-input bg-background px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring";
 
   if (!lines.length) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6">
+      <div className="mx-auto max-w-xl px-4 py-20 text-center sm:px-6">
         <h1 className="font-display text-3xl font-semibold">Your tiffin is empty</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Add the main meal and any extras from today&apos;s menu.
+        <p className="mt-3 text-muted-foreground">
+          Head back to today&apos;s menu to add the main meal and any extras.
         </p>
-        <Button asChild size="lg" className="mt-6">
-          <Link href="/">Back to today&apos;s menu</Link>
-        </Button>
-        <OrderStatusDialog order={placedOrder} open={statusOpen} onOpenChange={setStatusOpen} />
+        <Link
+          href="/"
+          className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-primary px-6 py-2.5 font-semibold text-primary-foreground transition hover:opacity-90 active:scale-[0.98]"
+        >
+          View today&apos;s menu
+        </Link>
         <Toaster richColors position="top-center" />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6">
-      <div className="flex items-baseline justify-between gap-4 py-8">
-        <h1 className="font-display text-3xl font-semibold">Checkout</h1>
-        <Link
-          href="/"
-          className="text-sm text-muted-foreground underline-offset-4 hover:underline"
-        >
-          ← Back to menu
-        </Link>
-      </div>
+    <div className="mx-auto max-w-5xl px-4 pb-16 pt-10 sm:px-6">
+      <h1 className="font-display text-3xl font-semibold sm:text-4xl">Checkout</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        No online payment. You&apos;ll pay in person at pickup or delivery.
+      </p>
 
-      <div className="grid gap-8 pb-16 lg:grid-cols-[1fr_360px]">
-        <form onSubmit={submit} className="space-y-6" id="checkout-form">
+      {!orderable && ordering && (
+        <div className="mt-6 border border-border bg-card p-5 text-sm">
+          {ordering.opens_at && ordering.closes_at
+            ? `Ordering is currently closed. Ordering is open ${formatTime(ordering.opens_at)}-${formatTime(ordering.closes_at)} NZ.`
+            : "We couldn't confirm the ordering window. Please try again shortly."}
+        </div>
+      )}
+
+      <form onSubmit={submit} className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
+        <div className="space-y-8">
           {/* Fulfilment */}
-          <div className="space-y-2">
-            <Label>Fulfilment</Label>
-            <RadioGroup
-              value={fulfilment}
-              onValueChange={(v) => setFulfilment(v as Fulfilment)}
-              className="grid grid-cols-2 gap-2"
-            >
-              <div className="flex items-center gap-2 rounded-lg border p-3">
-                <RadioGroupItem value="pickup" id="fulfilment-pickup" />
-                <Label htmlFor="fulfilment-pickup" className="font-normal">
-                  Pickup
-                </Label>
-              </div>
-              <div className="flex items-center gap-2 rounded-lg border p-3">
-                <RadioGroupItem value="delivery" id="fulfilment-delivery" />
-                <Label htmlFor="fulfilment-delivery" className="font-normal">
-                  Delivery
-                </Label>
-              </div>
-            </RadioGroup>
-            {fulfilment === "pickup" && settings?.pickup_start_time ? (
-              <p className="text-sm text-muted-foreground">
-                Pickup window: {settings.pickup_start_time}–{settings.pickup_end_time}
-              </p>
-            ) : null}
-          </div>
+          <section className="border border-border bg-card p-6">
+            <h2 className="font-display text-lg font-semibold">Pickup or delivery?</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <FulfilmentOption
+                selected={fulfilment === "pickup"}
+                onSelect={() => setFulfilment("pickup")}
+                icon="bag"
+                title="Pickup"
+                detail={
+                  settings?.pickup_start_time
+                    ? `Any time ${settings.pickup_start_time}–${settings.pickup_end_time}. Pay in person.`
+                    : "Pay in person."
+                }
+              />
+              <FulfilmentOption
+                selected={fulfilment === "delivery"}
+                onSelect={() => setFulfilment("delivery")}
+                icon="scooter"
+                title="Delivery"
+                detail="We time the run. No delivery fees. Pay in person."
+              />
+            </div>
+          </section>
 
-          {/* Contact */}
-          <div className="space-y-1.5">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              required
-              value={form.name}
-              onChange={(e) => set("name")(e.target.value)}
-              autoComplete="name"
-            />
-            {err("name")}
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={form.email}
-              onChange={(e) => set("email")(e.target.value)}
-              autoComplete="email"
-            />
-            {err("email")}
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={form.phone}
-              onChange={(e) => set("phone")(e.target.value)}
-              autoComplete="tel"
-            />
-            {err("phone")}
-            <p className="text-xs text-muted-foreground">
-              Email or phone — at least one is required.
-            </p>
-          </div>
-
-          {/* Delivery details */}
-          {fulfilment === "delivery" ? (
-            <>
-              <div className="space-y-1.5">
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  value={form.address}
-                  onChange={(e) => set("address")(e.target.value)}
-                  autoComplete="street-address"
+          {/* Your details */}
+          <section className="border border-border bg-card p-6">
+            <h2 className="font-display text-lg font-semibold">Your details</h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <Field label="Name" required htmlFor="name">
+                <input
+                  id="name"
+                  required
+                  autoComplete="name"
+                  className={inputCls}
+                  value={form.name}
+                  onChange={(e) => set("name")(e.target.value)}
                 />
-                {err("address")}
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="suburb">Suburb</Label>
-                <Select value={form.suburb} onValueChange={set("suburb")}>
-                  <SelectTrigger id="suburb">
-                    <SelectValue placeholder="Choose your suburb" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {settings?.delivery_suburbs.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {err("suburb")}
-              </div>
-            </>
-          ) : null}
-        </form>
+                {err("name")}
+              </Field>
+              <Field
+                label="Phone"
+                htmlFor="phone"
+                hint="Email or phone — at least one is required."
+              >
+                <input
+                  id="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  className={inputCls}
+                  value={form.phone}
+                  onChange={(e) => set("phone")(e.target.value)}
+                />
+                {err("phone")}
+              </Field>
+              <Field label="Email (optional)" htmlFor="email">
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  className={inputCls}
+                  value={form.email}
+                  onChange={(e) => set("email")(e.target.value)}
+                />
+                {err("email")}
+              </Field>
+            </div>
 
-        {/* Order summary */}
+            {fulfilment === "delivery" && (
+              <div className="mt-4 grid gap-4">
+                <Field label="Delivery address" required htmlFor="address">
+                  <textarea
+                    id="address"
+                    required
+                    rows={2}
+                    className={`${inputCls} resize-y`}
+                    value={form.address}
+                    onChange={(e) => set("address")(e.target.value)}
+                  />
+                  {err("address")}
+                </Field>
+                <Field label="Suburb" required htmlFor="suburb">
+                  <select
+                    id="suburb"
+                    required
+                    className={inputCls}
+                    value={form.suburb}
+                    onChange={(e) => set("suburb")(e.target.value)}
+                  >
+                    <option value="">Choose your suburb</option>
+                    {settings?.delivery_suburbs.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                  {err("suburb")}
+                </Field>
+              </div>
+            )}
+          </section>
+
+          {/* Items */}
+          <section className="border border-border bg-card p-6">
+            <h2 className="font-display text-lg font-semibold">Your items</h2>
+            <ul className="mt-4 divide-y divide-border">
+              {lines.map(({ item, quantity }) => (
+                <li
+                  key={item.id}
+                  className="flex items-center justify-between gap-4 py-3"
+                >
+                  <div>
+                    <p className="font-medium">{item.name}</p>
+                    <p className="text-sm text-muted-foreground ttc-num">
+                      {formatMoney(item.price)} each
+                    </p>
+                  </div>
+                  <QuantityStepper
+                    value={quantity}
+                    onChange={(q) => setQuantity(item, q)}
+                    label={`Quantity of ${item.name}`}
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+
+        {/* Summary */}
         <aside className="h-fit border border-border bg-card p-6 lg:sticky lg:top-24">
-          <h2 className="font-display text-lg font-semibold">Your tiffin</h2>
-          <ul className="mt-3 space-y-3">
-            {lines.map(({ item, quantity }) => (
-              <li key={item.id} className="flex items-center justify-between gap-3 text-sm">
-                <div className="min-w-0">
-                  <p className="font-medium">{item.name}</p>
-                  <p className="text-muted-foreground">{formatMoney(item.price)} each</p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Button
-                    type="button"
-                    size="icon-sm"
-                    variant="outline"
-                    aria-label={`Remove one ${item.name}`}
-                    onClick={() => setQuantity(item, quantity - 1)}
-                  >
-                    <Minus className="h-4 w-4" aria-hidden />
-                  </Button>
-                  <span className="w-8 text-center tabular-nums">{quantity}</span>
-                  <Button
-                    type="button"
-                    size="icon-sm"
-                    variant="outline"
-                    aria-label={`Add one ${item.name}`}
-                    disabled={quantity >= 20}
-                    onClick={() => setQuantity(item, quantity + 1)}
-                  >
-                    <Plus className="h-4 w-4" aria-hidden />
-                  </Button>
-                </div>
+          <h2 className="font-display text-lg font-semibold">Order summary</h2>
+          <ul className="mt-3 space-y-2 text-sm">
+            {lines.map((line) => (
+              <li key={line.item.id} className="flex justify-between gap-3">
+                <span>
+                  {line.quantity} × {line.item.name}
+                </span>
+                <span className="ttc-num">
+                  {formatMoney(line.item.price * line.quantity)}
+                </span>
               </li>
             ))}
           </ul>
-
-          <Separator className="my-4" />
-
-          <div className="flex items-center justify-between text-sm font-medium">
-            <span>Total (pay in person)</span>
-            <span className="tabular-nums">{formatMoney(total)}</span>
+          <div className="mt-4 flex justify-between border-t border-border pt-4 text-base font-semibold">
+            <span>Total</span>
+            <span className="ttc-num">{formatMoney(total)}</span>
           </div>
+          <p className="mt-2 rounded-lg bg-secondary px-3 py-2.5 text-xs text-secondary-foreground">
+            Pay in person at {fulfilment === "pickup" ? "pickup" : "delivery"}.
+          </p>
 
-          <Button
+          <button
             type="submit"
-            size="lg"
-            className="mt-4 w-full"
-            form="checkout-form"
             disabled={submitting}
+            className="mt-5 flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 font-semibold text-primary-foreground shadow-sm transition hover:opacity-90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
           >
             {submitting ? "Placing order…" : `Place order · ${formatMoney(total)}`}
-          </Button>
+          </button>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Need to change something?{" "}
+            <Link href="/" className="text-primary underline underline-offset-4">
+              Back to today&apos;s menu
+            </Link>
+            .
+          </p>
         </aside>
-      </div>
+      </form>
 
-      <OrderStatusDialog order={placedOrder} open={statusOpen} onOpenChange={setStatusOpen} />
       <Toaster richColors position="top-center" />
+    </div>
+  );
+}
+
+function FulfilmentOption({
+  selected,
+  onSelect,
+  icon,
+  title,
+  detail,
+}: {
+  selected: boolean;
+  onSelect: () => void;
+  icon: "bag" | "scooter";
+  title: string;
+  detail: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={selected}
+      className={`border p-4 text-left transition hover:-translate-y-0.5 ${
+        selected
+          ? "border-primary bg-primary/5 ring-2 ring-ring"
+          : "border-border bg-background hover:bg-secondary/60"
+      }`}
+    >
+      <OptionIcon name={icon} />
+      <p className="mt-1.5 font-semibold">{title}</p>
+      <p className="mt-0.5 text-xs text-muted-foreground">{detail}</p>
+    </button>
+  );
+}
+
+/** Simple geometric icons so the page never leans on emoji. */
+function OptionIcon({ name }: { name: "bag" | "scooter" }) {
+  const cls = "h-5 w-5 text-primary";
+  if (name === "scooter") {
+    return (
+      <svg
+        aria-hidden
+        viewBox="0 0 24 24"
+        className={cls}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="5.5" cy="17.5" r="2.5" />
+        <circle cx="18.5" cy="17.5" r="2.5" />
+        <path d="M8 17.5h8M12 17.5 9 8H6.5" />
+        <path d="M12 17.5l3-6h3.5" />
+      </svg>
+    );
+  }
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      className={cls}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 8h14l-1 12H6L5 8Z" />
+      <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+    </svg>
+  );
+}
+
+function Field({
+  label,
+  required,
+  hint,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  hint?: string;
+  htmlFor: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label htmlFor={htmlFor} className="text-sm font-medium">
+        {label}
+        {required && (
+          <span className="text-primary" aria-hidden>
+            {" "}
+            *
+          </span>
+        )}
+      </label>
+      {children}
+      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
+function QuantityStepper({
+  value,
+  onChange,
+  label,
+}: {
+  value: number;
+  onChange: (next: number) => void;
+  label: string;
+}) {
+  return (
+    <div className="inline-flex items-center rounded-lg border border-border bg-background">
+      <button
+        type="button"
+        aria-label={`Decrease ${label}`}
+        disabled={value === 0}
+        onClick={() => onChange(value - 1)}
+        className="flex h-11 w-11 items-center justify-center rounded-l-lg text-lg font-semibold text-secondary-foreground hover:bg-secondary disabled:opacity-40 cursor-pointer"
+      >
+        −
+      </button>
+      <span aria-live="polite" className="w-10 text-center font-semibold ttc-num">
+        {value}
+      </span>
+      <button
+        type="button"
+        aria-label={`Increase ${label}`}
+        disabled={value >= 20}
+        onClick={() => onChange(value + 1)}
+        className="flex h-11 w-11 items-center justify-center rounded-r-lg text-lg font-semibold text-secondary-foreground hover:bg-secondary disabled:opacity-40 cursor-pointer"
+      >
+        +
+      </button>
     </div>
   );
 }
