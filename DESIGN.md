@@ -78,10 +78,12 @@ veg indicators. Defined as shadcn CSS variables (`oklch`), light and dark:
 
 **shadcn/ui installed (2026-11-14):** button, badge, card, dialog, input, label,
 radio-group, select, separator, sheet, skeleton, sonner, tabs, textarea.
+**Added 2026-11-15:** accordion.
 
 **Custom components:** `ordering-status-banner`, `menu-item-card`,
-`checkout-sheet` (Sheet), `order-status` (status dialog + find-order lookup +
-cancel), `sign-in` (Tabs login/register), `home-client` (page shell).
+`checkout-sheet` (Sheet), `sign-in` (Tabs login/register), `home-client` (page
+shell), `cancel-order-dialog`, `order-store` (localStorage token memory).
+**Removed 2026-11-15:** `order-status` (dialog) — replaced by the `/order` page.
 **Lib:** `lib/api.ts` (axios client, envelope unwrap, ApiError), `lib/types.ts`
 (api.md shapes), `lib/format.ts` (cents→NZD, HH:MM), `lib/cart-context.tsx`
 (cart state, qty 1–20), `lib/utils.ts` (cn).
@@ -96,3 +98,8 @@ cancel), `sign-in` (Tabs login/register), `home-client` (page shell).
 | 2026-11-14 | shadcn/ui + @shadcnblocks premium blocks as component source of truth                                            | Consistency, speed, premium quality                         |
 | 2026-11-14 | Single-page home: menu + cart + checkout in Sheet, order lookup via dialog; axios client unwrapping API envelope | api.md is guest-first; one page covers the whole storefront |
 | 2026-11-14 | Warm-orange `oklch` tokens in `globals.css` (light+dark), `.75rem` radius                                        | Implements the palette decision as shadcn CSS variables     |
+| 2026-11-15 | Guest order memory: today's manage tokens in localStorage (`lib/order-store.ts`); `/order` page fetches orders live by token (URL token as fallback) | Guests lost orders on refresh/close; server stays source of truth, no cached PII |
+| 2026-11-15 | Cancellation is a demoted text link + confirmation dialog, hidden past cutoff/expiry                            | Prevent accidental one-click cancels                        |
+| 2026-11-15 | Find-order modal removed; header "My order" links to `/order`, manual token+contact lookup lives on that page    | Modals lose state and aren't shareable; one home for order management |
+| 2026-11-15 | Global pointer-cursor rule in `globals.css` (`button:not(:disabled)`, `[role=button]`, `select`, `summary`, `label[for]`); disabled stays default | Tailwind v4 reset defaults buttons to `cursor: default`; one rule beats per-element classes |
+| 2026-11-15 | All raw form controls/buttons replaced with shadcn primitives (Input, Textarea, Select, Button, Label, Card, Accordion); `min-h-11` overrides preserve 44px touch targets | Skill mandate: never hand-roll primitives shadcn provides; a11y tap-target floor kept |
