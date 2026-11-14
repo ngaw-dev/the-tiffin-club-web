@@ -76,12 +76,15 @@ veg indicators. Defined as shadcn CSS variables (`oklch`), light and dark:
 
 ## Component Inventory
 
-_Planned shadcn components:_ Button, Card, Badge, Dialog, Sheet (cart drawer),
-Tabs & Sidebar (menu categories), Sonner (toasts), Skeleton, Avatar,
-Separator, Scroll Area, Form primitives, plus @shadcnblocks sections for
-landing/hero/footer/auth.
+**shadcn/ui installed (2026-11-14):** button, badge, card, dialog, input, label,
+radio-group, select, separator, sheet, skeleton, sonner, tabs, textarea.
 
-_Add each installed component/block here with its states as it's added._
+**Custom components:** `ordering-status-banner`, `menu-item-card`,
+`checkout-sheet` (Sheet), `order-status` (status dialog + find-order lookup +
+cancel), `sign-in` (Tabs login/register), `home-client` (page shell).
+**Lib:** `lib/api.ts` (axios client, envelope unwrap, ApiError), `lib/types.ts`
+(api.md shapes), `lib/format.ts` (cents→NZD, HH:MM), `lib/cart-context.tsx`
+(cart state, qty 1–20), `lib/utils.ts` (cn).
 
 ## Decision Log
 
@@ -91,3 +94,5 @@ _Add each installed component/block here with its states as it's added._
 | 2026-11-14 | Primary palette: warm orange | Appetite appeal, energy; green reserved for veg |
 | 2026-11-14 | On-demand ordering only, no subscriptions | Product scope decision |
 | 2026-11-14 | shadcn/ui + @shadcnblocks premium blocks as component source of truth | Consistency, speed, premium quality |
+| 2026-11-14 | Single-page home: menu + cart + checkout in Sheet, order lookup via dialog; axios client unwrapping API envelope | api.md is guest-first; one page covers the whole storefront |
+| 2026-11-14 | Warm-orange `oklch` tokens in `globals.css` (light+dark), `.75rem` radius | Implements the palette decision as shadcn CSS variables |
