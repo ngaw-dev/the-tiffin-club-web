@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -32,10 +32,18 @@ function OrderClient() {
   const placed = params.get("placed") === "1";
 
   // Stored tokens for today; URL token (share/refresh fallback) takes priority.
-  const [tokens, setTokens] = useState<string[]>(() => {
+  // localStorage is browser-only, so storage is read after mount — reading it
+  // during render would make SSR output (no tokens) mismatch the client.
+  const [tokens, setTokens] = useState<string[]>(urlToken ? [urlToken] : []);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
     const stored = todayOrders().map((o) => o.token);
-    return urlToken ? [urlToken, ...stored.filter((t) => t !== urlToken)] : stored;
-  });
+    setTokens((prev) => {
+      const merged = [...prev, ...stored];
+      return [...new Set(merged)];
+    });
+    setMounted(true);
+  }, []);
   const [cancelToken, setCancelToken] = useState<string | null>(null);
   // Orders recovered via manual lookup, shown below stored ones.
   const [lookupOrders, setLookupOrders] = useState<Order[]>([]);
@@ -55,7 +63,9 @@ function OrderClient() {
   const cutoffTime = settingsQuery.data?.order_cutoff_time ?? null;
   const orders = ordersQuery.data ?? [];
 
-  if (ordersQuery.isLoading) {
+  // mounted=false means localStorage hasn't been read yet — show the same
+  // loading state SSR rendered, so server and client agree on first paint.
+  if (!mounted || ordersQuery.isLoading) {
     return (
       <div className="mx-auto max-w-xl px-4 py-20 text-center text-sm text-muted-foreground sm:px-6">
         Loading your order…
