@@ -7,19 +7,19 @@ import { formatMoney, formatTime } from "@/lib/format";
 import { getSettings, getTodayMenu } from "@/lib/api";
 import { contactFromSettings } from "@/lib/brand";
 import { useCart } from "@/lib/cart-context";
-import { OrderingStateBadge } from "@/components/home/ordering-state-badge";
-import { ClosingSoonCountdown } from "@/components/home/closing-soon-countdown";
-import { CheckoutSheet } from "@/components/home/checkout-sheet";
-import { OrderStatusDialog } from "@/components/home/order-status";
-import { usePrefill } from "@/components/home/sign-in";
+import { OrderingStateBadge } from "@/app/(home)/ordering-state-badge";
+import { ClosingSoonCountdown } from "@/app/(home)/closing-soon-countdown";
+import { CheckoutSheet } from "@/app/(home)/checkout-sheet";
+import { OrderStatusDialog } from "@/app/(home)/order-status";
+import { usePrefill } from "@/app/(home)/sign-in";
+import { HowItWorks } from "@/app/(home)/how-it-works";
+import { Faq } from "@/app/(home)/faq";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { MenuItem, Order } from "@/lib/types";
 
 // Stand-in photographs (to be replaced with the kitchen's own photos)
 const HERO_IMG =
   "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=1200&q=70";
-const KITCHEN_IMG =
-  "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=1200&q=70";
 const MENU_IMG =
   "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=1200&q=70";
 
@@ -298,103 +298,10 @@ export function HomeClient() {
       </section>
 
       {/* How it works */}
-      <section id="how-it-works" className="scroll-mt-24 py-14">
-        <h2 className="font-display text-2xl font-semibold sm:text-3xl">How it works</h2>
-        <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-14">
-          <div className="group overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={KITCHEN_IMG}
-              alt="Meals being prepared in the kitchen"
-              className="aspect-[3/4] h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-            />
-          </div>
-          <ol className="space-y-8">
-            {[
-              ...(windowLabel
-                ? [
-                    {
-                      title: `Order by ${windowLabel.split("-")[1]}`,
-                      body: `Today's menu goes live at ${windowLabel.split("-")[0]}. Order any time until ${windowLabel.split("-")[1]}, so decisions stay simple.`,
-                    },
-                  ]
-                : [
-                    {
-                      title: "Place your order",
-                      body: "Today's menu goes live each morning and ordering stays open all day, so decisions stay simple.",
-                    },
-                  ]),
-              {
-                title: "Pickup or delivery",
-                body: `Collect from us${contact.pickupWindow ? ` between ${contact.pickupWindow}` : ""}, or get it delivered. No delivery fees.`,
-              },
-              {
-                title: "Pay in person",
-                body: "No cards online. Pay when you collect, or when we knock on your door.",
-              },
-            ].map((step, i) => (
-              <li key={step.title} className="flex gap-5">
-                <span
-                  aria-hidden
-                  className="font-display text-3xl font-semibold text-primary ttc-num"
-                >
-                  {i + 1}
-                </span>
-                <div>
-                  <h3 className="font-semibold">{step.title}</h3>
-                  <p className="mt-1.5 max-w-md text-sm leading-relaxed text-muted-foreground">
-                    {step.body}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
+      <HowItWorks windowLabel={windowLabel} contact={contact} />
 
       {/* FAQ */}
-      <section id="faq" className="scroll-mt-24 pb-16">
-        <h2 className="font-display text-2xl font-semibold sm:text-3xl">Common questions</h2>
-        <div className="mt-6 divide-y divide-border border border-border bg-card">
-          {[
-            ...(windowLabel
-              ? [
-                  {
-                    q: "What time can I order?",
-                    a: `Ordering runs ${windowLabel}, every day. After ${windowLabel.split("-")[1]} the kitchen locks in the prep list.`,
-                  },
-                ]
-              : []),
-            {
-              q: "Can I change or cancel my order?",
-              a: `Yes. You can update any detail or cancel${windowLabel ? ` until the ${windowLabel.split("-")[1]} cutoff` : ""} from your manage-order link. After that, give us a call.`,
-            },
-            {
-              q: "How do I pay?",
-              a: "In person, at pickup or delivery. No online payment. What you see on your order total is what you pay.",
-            },
-            {
-              q: "Where do you deliver?",
-              a: "We deliver to selected suburbs — the list is in checkout. We time the delivery run, so there's no need to pick a slot.",
-            },
-          ].map((item) => (
-            <details key={item.q} className="group px-6 py-4">
-              <summary className="cursor-pointer list-none font-medium marker:hidden">
-                <span className="flex items-center justify-between gap-4">
-                  {item.q}
-                  <span
-                    aria-hidden
-                    className="text-muted-foreground transition group-open:rotate-45"
-                  >
-                    +
-                  </span>
-                </span>
-              </summary>
-              <p className="mt-2 text-sm text-muted-foreground">{item.a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
+      <Faq windowLabel={windowLabel} />
 
       <OrderStatusDialog order={placedOrder} open={statusOpen} onOpenChange={setStatusOpen} />
       <Toaster richColors position="top-center" />

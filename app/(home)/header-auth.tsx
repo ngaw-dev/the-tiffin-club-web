@@ -1,7 +1,7 @@
 "use client";
 
-import { FindOrderLink } from "@/components/home/order-status";
-import { SignInLink } from "@/components/home/sign-in";
+import { FindOrderLink } from "@/app/(home)/order-status";
+import { SignInLink } from "@/app/(home)/sign-in";
 
 /** Header auth/order row: text links, dialog-driven. */
 export function HeaderAuth() {

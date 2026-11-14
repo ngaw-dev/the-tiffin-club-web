@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HeaderAuth } from "@/components/home/header-auth";
+import { HeaderAuth } from "@/app/(home)/header-auth";
 
 export function SiteHeader() {
   return (

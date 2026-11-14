@@ -1,4 +1,4 @@
-import { HomeClient } from "@/components/home/home-client";
+import { HomeClient } from "@/app/(home)/home-client";
 import { CartProvider } from "@/lib/cart-context";
 
 export default function Page() {
