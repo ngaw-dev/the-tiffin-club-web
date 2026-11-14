@@ -1,27 +1,9 @@
 import { Hero296 } from "@/components/hero296";
 
-const AVATARS = [
-  {
-    src: "https://cdn.shadcnblocks.com/shadcnblocks/image-set/modern/avatars/avatar1.webp",
-    alt: "Jack Walsh",
-  },
-  {
-    src: "https://cdn.shadcnblocks.com/shadcnblocks/image-set/modern/avatars/avatar2.webp",
-    alt: "Ilze Pērkone",
-  },
-  {
-    src: "https://cdn.shadcnblocks.com/shadcnblocks/image-set/modern/avatars/avatar3.webp",
-    alt: "Vernon Desilets",
-  },
-  {
-    src: "https://cdn.shadcnblocks.com/shadcnblocks/image-set/modern/avatars/avatar4.webp",
-    alt: "Lín Wàngshū",
-  },
-  {
-    src: "https://cdn.shadcnblocks.com/shadcnblocks/image-set/modern/avatars/avatar5.webp",
-    alt: "Rajesh Bhatt",
-  },
-];
+const HERO_IMAGE = {
+  src: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=1200&q=70",
+  alt: "A home-style Indian meal served in steel tiffin containers",
+};
 
 export function Hero({ windowLabel }: { windowLabel: string | null }) {
   return (
@@ -36,12 +18,7 @@ export function Hero({ windowLabel }: { windowLabel: string | null }) {
         primary: { text: "Order today's meal", url: "#todays-menu" },
         secondary: { text: "How it works", url: "#how-it-works" },
       }}
-      reviews={{
-        count: 206,
-        rating: 4.9,
-        avatars: AVATARS,
-      }}
-      byline="Trusted by tiffin lovers across Wellington"
+      image={HERO_IMAGE}
     />
   );
 }
