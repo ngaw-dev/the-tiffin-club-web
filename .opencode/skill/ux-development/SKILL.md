@@ -60,6 +60,15 @@ Rules:
   via the shadcn CLI (respecting the project's `components.json` — style,
   aliases, icon library) over hand-rolling primitives. Only build custom
   components when composing/shadcn primitives cannot achieve the design.
+- **Keep `components/ui/**` at the current registry version.** shadcn blocks and
+  demos (e.g., `@shadcnblocks` examples in `components/`) rely on the modern
+  component internals: `data-slot="..."` attributes (hover/glide effects query
+  `[data-slot="accordion-item"]` etc.), Tailwind v4 variants like
+  `in-aria-expanded:` and `not-last:`, and current default classes
+  (`border-b last:border-b-0`). If a component in `components/ui/` is an older
+  forwardRef-style version without these, replace it wholesale via the CLI (or
+  from the reference repo) rather than patching classes — stale components
+  silently break blocks that depend on those internals.
 - **Premium blocks first:** before hand-building any page-level section (hero,
   pricing, dashboard, footer, menu grid, auth screen), search the project's
   configured registries (e.g., `@shadcnblocks`) and add a block via the CLI

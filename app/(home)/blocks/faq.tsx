@@ -37,9 +37,7 @@ export function Faq({ windowLabel }: { windowLabel: string | null }) {
   }, [hovered]);
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const item = (event.target as HTMLElement).closest<HTMLElement>(
-      '[data-slot="accordion-item"]',
-    );
+    const item = (event.target as HTMLElement).closest<HTMLElement>('[data-slot="accordion-item"]');
     if (item && item !== hovered) setHovered(item);
   };
 
@@ -92,11 +90,7 @@ export function Faq({ windowLabel }: { windowLabel: string | null }) {
         />
         <Accordion type="single" collapsible className="relative">
           {items.map((item) => (
-            <AccordionItem
-              key={item.id}
-              value={item.id}
-              className="px-4 py-1 not-last:border-b-0"
-            >
+            <AccordionItem key={item.id} value={item.id} className="px-4 py-1 not-last:border-b-0">
               <AccordionTrigger className="items-center font-medium hover:no-underline [&>svg]:hidden!">
                 {item.q}
                 <AccordionIndicator className="ml-auto" variant="chevron" />

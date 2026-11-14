@@ -1,9 +1,9 @@
-import { ChevronDownIcon, ChevronRightIcon } from "lucide-react"
+import { ChevronDownIcon, ChevronRightIcon } from "lucide-react";
 
-import { cn } from "cn"
+import { cn } from "@/lib/utils";
 
-type AccordionIndicatorVariant = "plus" | "chevron" | "chevron-right"
-type AccordionIndicatorShape = "none" | "square" | "circle"
+type AccordionIndicatorVariant = "plus" | "chevron" | "chevron-right";
+type AccordionIndicatorShape = "none" | "square" | "circle";
 
 const shapeClasses: Record<AccordionIndicatorShape, string> = {
   none: "size-4",
@@ -11,7 +11,7 @@ const shapeClasses: Record<AccordionIndicatorShape, string> = {
     "size-6 rounded-md border bg-background in-aria-expanded:border-foreground in-aria-expanded:bg-foreground in-aria-expanded:text-background",
   circle:
     "size-6 rounded-full border bg-background in-aria-expanded:border-foreground in-aria-expanded:bg-foreground in-aria-expanded:text-background",
-}
+};
 
 // Reads the open state from the nearest [aria-expanded="true"] ancestor, so it
 // works inside any AccordionTrigger (Radix, Base UI or React Aria).
@@ -21,8 +21,8 @@ function AccordionIndicator({
   className,
   ...props
 }: React.ComponentProps<"span"> & {
-  variant?: AccordionIndicatorVariant
-  shape?: AccordionIndicatorShape
+  variant?: AccordionIndicatorVariant;
+  shape?: AccordionIndicatorShape;
 }) {
   return (
     <span
@@ -32,7 +32,7 @@ function AccordionIndicator({
       className={cn(
         "relative flex shrink-0 items-center justify-center text-muted-foreground transition-colors duration-200 in-aria-expanded:text-foreground",
         shapeClasses[shape],
-        className
+        className,
       )}
       {...props}
     >
@@ -49,8 +49,8 @@ function AccordionIndicator({
         <ChevronRightIcon className="size-3.5 transition-transform duration-200 ease-out in-aria-expanded:rotate-90" />
       )}
     </span>
-  )
+  );
 }
 
-export { AccordionIndicator }
-export type { AccordionIndicatorShape, AccordionIndicatorVariant }
+export { AccordionIndicator };
+export type { AccordionIndicatorShape, AccordionIndicatorVariant };

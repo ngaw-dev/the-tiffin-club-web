@@ -66,9 +66,7 @@ const Example = () => {
   }, [hovered]);
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const item = (event.target as HTMLElement).closest<HTMLElement>(
-      '[data-slot="accordion-item"]',
-    );
+    const item = (event.target as HTMLElement).closest<HTMLElement>('[data-slot="accordion-item"]');
     if (item && item !== hovered) setHovered(item);
   };
 
@@ -90,18 +88,12 @@ const Example = () => {
       />
       <Accordion className="relative" collapsible type="single">
         {items.map((item) => (
-          <AccordionItem
-            className="px-3 not-last:border-b-0"
-            key={item.id}
-            value={item.id}
-          >
+          <AccordionItem className="px-3 not-last:border-b-0" key={item.id} value={item.id}>
             <AccordionTrigger className="items-center hover:no-underline [&>svg]:hidden!">
               {item.title}
               <AccordionIndicator className="ml-auto" variant="chevron" />
             </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground">
-              {item.content}
-            </AccordionContent>
+            <AccordionContent className="text-muted-foreground">{item.content}</AccordionContent>
           </AccordionItem>
         ))}
       </Accordion>
