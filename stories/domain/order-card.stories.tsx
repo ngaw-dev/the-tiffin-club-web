@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { OrderCard } from "@/components/order-card";
+import { settings } from "../fixtures/menu";
 import {
   cancelledOrder,
   completedDeliveryOrder,
@@ -22,10 +23,11 @@ type Story = StoryObj<typeof OrderCard>;
 const render =
   (order: Parameters<typeof OrderCard>[0]["order"], withCancel = true) =>
   () => (
-    <div className="p-2">
+    <div className="">
       <OrderCard
         order={order}
         cutoffTime={withCancel ? "20:45" : null}
+        pickupAddress={settings.pickup_address}
         onCancel={withCancel ? () => {} : undefined}
         className=""
       />

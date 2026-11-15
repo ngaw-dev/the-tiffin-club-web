@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { OrderSummary } from "@/components/checkout/order-summary";
-import { cartLines } from "../fixtures/menu";
+import { cartLines, settings } from "../fixtures/menu";
 
 const meta: Meta<typeof OrderSummary> = {
   title: "Blocks/Checkout/Order Summary",
@@ -13,11 +13,29 @@ type Story = StoryObj<typeof OrderSummary>;
 const total = cartLines[0].item.price + cartLines[1].item.price * cartLines[1].quantity;
 
 export const Pickup: Story = {
-  render: () => <OrderSummary lines={cartLines} total={total} fulfilment="pickup" />,
+  render: () => (
+    <OrderSummary
+      lines={cartLines}
+      total={total}
+      fulfilment="pickup"
+      address={settings.pickup_address}
+    />
+  ),
 };
 
 export const Delivery: Story = {
-  render: () => <OrderSummary lines={cartLines} total={total} fulfilment="delivery" />,
+  render: () => (
+    <OrderSummary
+      lines={cartLines}
+      total={total}
+      fulfilment="delivery"
+      address="42 Example St, Te Aro, Wellington"
+    />
+  ),
+};
+
+export const NoAddress: Story = {
+  render: () => <OrderSummary lines={cartLines} total={total} fulfilment="pickup" />,
 };
 
 export const Submitting: Story = {
