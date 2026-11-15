@@ -4,6 +4,11 @@ import "../app/globals.css";
 
 import { ForcedThemeProvider } from "./theme-provider";
 
+// Mirror the app's root layout so pages render with the same shell
+// (fonts/theme vars live on <body> classes in app/layout.tsx).
+const bodyClasses =
+  "min-h-full flex flex-col bg-background font-sans text-foreground";
+
 // Fixture-backed mocks for data/auth-coupled components (orders page etc.).
 // Note: extensionless resolution fails here, hence the explicit .ts
 sb.mock(import("../lib/api.ts"));
@@ -45,7 +50,11 @@ const preview: Preview = {
   decorators: [
     (Story, context) => (
       <ForcedThemeProvider theme={(context.globals.theme as Theme) ?? "light"}>
-        <Story />
+        <body className={bodyClasses}>
+          <main className="flex-1">
+            <Story />
+          </main>
+        </body>
       </ForcedThemeProvider>
     ),
   ],
