@@ -18,15 +18,15 @@ Every response uses the same envelope:
 
 ### Status codes
 
-| Code | Meaning |
-|------|---------|
-| 200 | OK |
-| 201 | Created (order placed, account registered) |
-| 401 | Missing/invalid bearer token |
-| 404 | Not found (also used for every order-lookup failure, so nothing leaks) |
-| 410 | Order manage token expired (past 23:59:59 on the order day) |
-| 422 | Validation failed — `errors` maps field → messages |
-| 429 | Rate limited (account register/login: 10/min) |
+| Code | Meaning                                                                |
+| ---- | ---------------------------------------------------------------------- |
+| 200  | OK                                                                     |
+| 201  | Created (order placed, account registered)                             |
+| 401  | Missing/invalid bearer token                                           |
+| 404  | Not found (also used for every order-lookup failure, so nothing leaks) |
+| 410  | Order manage token expired (past 23:59:59 on the order day)            |
+| 422  | Validation failed — `errors` maps field → messages                     |
+| 429  | Rate limited (account register/login: 10/min)                          |
 
 ### Money & times
 
@@ -115,9 +115,7 @@ Returned by every order endpoint (place, lookup, show, update, cancel):
     "suburb": "Te Aro"
   },
   "delivery_notes": "Knock twice",
-  "items": [
-    { "name": "Butter Chicken", "quantity": 2, "unit_price": 1600, "line_total": 3200 }
-  ],
+  "items": [{ "name": "Butter Chicken", "quantity": 2, "unit_price": 1600, "line_total": 3200 }],
   "total": 3600,
   "payment": "pay_in_person",
   "placed_at": "2026-11-15T10:00:00+13:00",
@@ -125,14 +123,14 @@ Returned by every order endpoint (place, lookup, show, update, cancel):
 }
 ```
 
-| Field | Notes |
-|-------|-------|
-| `status` | `placed` \| `confirmed` \| `ready_for_pickup` \| `out_for_delivery` \| `completed` \| `cancelled` — orders are returned as `confirmed` immediately on placement (auto-confirm; manual staff confirmation to come) |
-| `fulfilment` | `pickup` \| `delivery` |
-| `customer` | Live customer details at read time (not a placement snapshot) — absent if the relation isn't eager-loaded |
-| `delivery_notes` | Free-text notes for the driver (e.g. access instructions) |
-| `total` | Server-computed at menu prices, cents |
-| `expires_at` | The manage token's lifetime ends here — 23:59:59 on the order day |
+| Field            | Notes                                                                                                                                                                                                             |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `status`         | `placed` \| `confirmed` \| `ready_for_pickup` \| `out_for_delivery` \| `completed` \| `cancelled` — orders are returned as `confirmed` immediately on placement (auto-confirm; manual staff confirmation to come) |
+| `fulfilment`     | `pickup` \| `delivery`                                                                                                                                                                                            |
+| `customer`       | Live customer details at read time (not a placement snapshot) — absent if the relation isn't eager-loaded                                                                                                         |
+| `delivery_notes` | Free-text notes for the driver (e.g. access instructions)                                                                                                                                                         |
+| `total`          | Server-computed at menu prices, cents                                                                                                                                                                             |
+| `expires_at`     | The manage token's lifetime ends here — 23:59:59 on the order day                                                                                                                                                 |
 
 ### `POST /orders`
 
@@ -149,7 +147,10 @@ Place a guest order for today's menu. Returns **201** with the order object — 
   "address": "12 Cuba Street",
   "suburb": "Te Aro",
   "delivery_notes": "Knock twice",
-  "items": [{ "id": 3, "quantity": 2 }, { "id": 4, "quantity": 1 }]
+  "items": [
+    { "id": 3, "quantity": 2 },
+    { "id": 4, "quantity": 1 }
+  ]
 }
 ```
 
@@ -203,7 +204,7 @@ Edit an order before cutoff. All fields `sometimes`; item ids validated against 
 
 Applied fields: `fulfilment`, `delivery_notes`, `items`. Changing `fulfilment` to `delivery` does **not** re-validate a suburb (validate client-side against `GET /settings`). Errors: `422` (validation / off-menu items), **410** (expired), and `422` with `ordering` after cutoff.
 
-> ⚠️ Known gap: the request still *accepts* `name`, `address`, `suburb` (validated then silently ignored — these now live on the customer). Email/phone are already rejected.
+> ⚠️ Known gap: the request still _accepts_ `name`, `address`, `suburb` (validated then silently ignored — these now live on the customer). Email/phone are already rejected.
 
 ### `DELETE /orders/{token}`
 
@@ -211,37 +212,15 @@ Cancel an order before cutoff. **200** with the order object (`status: "cancelle
 
 ---
 
-## Account
+## Account (Clerk)
 
-Optional email/password credential. All account endpoints are rate-limited (10/min).
+Sign-in is handled by Clerk; the API never stores a Clerk identifier. Requests carry `Authorization: Bearer <clerk jwt>`. The JWT is verified locally against Clerk's JWKS (issuer, `azp` origin allow-list, expiry) and **must** carry `email_verified: true`. The verified email maps to the `customers` row (see `docs/adr/0001-clerk-email-only-linking.md`). Missing/invalid token → **401**. Requires `CLERK_ISSUER` and `CLERK_ALLOWED_ORIGINS` (comma-separated) in `.env`.
 
-### `POST /account/register`
+### `GET /my-account`
 
-**Request:**
+The signed-in customer. **Creates** the row from the JWT name + email on first request.
 
-```json
-{ "email": "amol@example.com", "password": "super-secret-1" }
-```
-
-**201**, `data`: `{ "token": "<bearer token>" }`. Duplicate email → `422` on `email`.
-
-### `POST /account/login`
-
-Same request body. **200** `data.token`. Bad credentials → `422` on `email`.
-
-### Authenticated endpoints
-
-Send `Authorization: Bearer <token>`. Missing/invalid → **401**.
-
-#### `GET /account/orders`
-
-The account's orders (newest first), matched through the customer whose email equals the account email — including guest orders placed before the account existed. `data` is an array of order objects.
-
-#### `GET /account/prefill`
-
-Prefill details from the most recent order.
-
-**Response `data`:**
+**200 `data`:**
 
 ```json
 {
@@ -253,4 +232,14 @@ Prefill details from the most recent order.
 }
 ```
 
-Fields are `null` when there is no prior order.
+### `PATCH /my-account`
+
+Update contact/delivery details. All fields optional (`name`, `phone`, `address`, `suburb`); `suburb` must be in the delivery list, `phone` unique. Invalid → **422**.
+
+### `GET /my-orders`
+
+Every order on the email-matched customer row — guest history included — newest first. No row yet → `data: []` (never creates one).
+
+### Authenticated order placement
+
+`POST /orders` stays public for guests. With a Bearer token present, the payload `email` (when given) must match the JWT email, else **422**; an invalid-but-present token → **401**. The order links to the email-matched customer as usual.

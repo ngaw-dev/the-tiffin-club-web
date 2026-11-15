@@ -20,12 +20,15 @@ import { getSettings, getTodayMenu } from "@/lib/api";
 import { ApiError, placeOrder } from "@/lib/api";
 import { useCart } from "@/lib/cart-context";
 import { formatMoney, formatTime } from "@/lib/format";
-import { usePrefill } from "@/app/(home)/sign-in";
+import { usePrefill } from "@/lib/account";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { rememberOrder } from "@/lib/order-store";
 import type { Fulfilment } from "@/lib/types";
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { getToken } = useAuth();
+  const { user } = useUser();
   const { lines, total, setQuantity, clear, toPayload } = useCart();
   const [submitting, setSubmitting] = useState(false);
   const [fulfilment, setFulfilment] = useState<Fulfilment>("pickup");
@@ -72,15 +75,30 @@ export default function CheckoutPage() {
     setSubmitting(true);
     setFieldErrors({});
     try {
-      const order = await placeOrder({
-        fulfilment,
-        name: form.name,
-        email: form.email || undefined,
-        phone: form.phone || undefined,
-        address: fulfilment === "delivery" ? form.address : undefined,
-        suburb: fulfilment === "delivery" ? form.suburb : undefined,
-        items: toPayload(),
-      });
+      const order = await placeOrder(
+        {
+          fulfilment,
+          name: form.name,
+          email: form.email || undefined,
+          phone: form.phone || undefined,
+          address: fulfilment === "delivery" ? form.address : undefined,
+          suburb: fulfilment === "delivery" ? form.suburb : undefined,
+          items: toPayload(),
+        },
+        (await getToken()) ?? undefined,
+      );
+
+      // Keep the Clerk profile in sync with the name given at checkout:
+      // first token is the first name, the rest is the last name.
+      if (user && form.name.trim()) {
+        const [firstName, ...rest] = form.name.trim().split(/\s+/);
+        try {
+          await user.update({ firstName, lastName: rest.join(" ") || "" });
+        } catch {
+          // Non-blocking: order placement already succeeded.
+        }
+      }
+
       toast.success("Order placed! We'll see you soon.");
       clear();
       rememberOrder(order.manage_token);

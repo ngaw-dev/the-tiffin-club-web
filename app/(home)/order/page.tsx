@@ -98,8 +98,8 @@ function OrderClient() {
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">Order placed!</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             We&apos;ll see you soon
-            {allOrders[0].customer?.name ? `, ${allOrders[0].customer.name}` : ""}. Pay in
-            person at {allOrders[0].fulfilment === "pickup" ? "pickup" : "delivery"}.
+            {allOrders[0].customer?.name ? `, ${allOrders[0].customer.name}` : ""}. Pay in person at{" "}
+            {allOrders[0].fulfilment === "pickup" ? "pickup" : "delivery"}.
           </p>
         </div>
       )}

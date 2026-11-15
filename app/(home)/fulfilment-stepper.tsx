@@ -56,7 +56,11 @@ export function FulfilmentStepper({
               <StepperTrigger>
                 <StepperIndicator>
                   {(state) =>
-                    state === "completed" ? <Check className="size-4" /> : <Icon className="size-4" />
+                    state === "completed" ? (
+                      <Check className="size-4" />
+                    ) : (
+                      <Icon className="size-4" />
+                    )
                   }
                 </StepperIndicator>
                 <StepperTitle>{step.title}</StepperTitle>

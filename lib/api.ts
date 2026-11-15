@@ -2,14 +2,7 @@
 // normalizes errors for the UI.
 
 import axios, { AxiosError } from "axios";
-import type {
-  AccountPrefill,
-  ApiEnvelope,
-  Order,
-  PlaceOrderInput,
-  StoreSettings,
-  TodayMenu,
-} from "./types";
+import type { ApiEnvelope, Order, PlaceOrderInput, StoreSettings, TodayMenu } from "./types";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1",
@@ -70,7 +63,7 @@ function toApiError(err: unknown): ApiError {
   return new ApiError(status, ax.message || "Network error");
 }
 
-async function unwrap<T>(p: Promise<{ data: ApiEnvelope<T> }>): Promise<T> {
+export async function unwrap<T>(p: Promise<{ data: ApiEnvelope<T> }>): Promise<T> {
   try {
     const res = await p;
     return res.data.data;
@@ -91,8 +84,12 @@ export function getSettings(): Promise<StoreSettings> {
 
 // --- Orders (guest-first) ---
 
-export function placeOrder(input: PlaceOrderInput): Promise<Order> {
-  return unwrap(api.post<ApiEnvelope<Order>>("/orders", input));
+/** Guest-first placement; when signed in, pass the Clerk session token so the
+ * order links to the email-matched customer (api.md "Authenticated order
+ * placement"). */
+export function placeOrder(input: PlaceOrderInput, bearer?: string): Promise<Order> {
+  const headers = bearer ? { Authorization: `Bearer ${bearer}` } : undefined;
+  return unwrap(api.post<ApiEnvelope<Order>>("/orders", input, { headers }));
 }
 
 export function lookupOrder(input: {
@@ -115,34 +112,4 @@ export function cancelOrder(token: string): Promise<Order> {
   return unwrap(api.delete<ApiEnvelope<Order>>(`/orders/${token}`));
 }
 
-// --- Account (optional) ---
-
-export function register(input: {
-  email: string;
-  password: string;
-  password_confirmation: string;
-}): Promise<{ token: string }> {
-  return unwrap(api.post<ApiEnvelope<{ token: string }>>("/account/register", input));
-}
-
-export function login(input: { email: string; password: string }): Promise<{
-  token: string;
-}> {
-  return unwrap(api.post<ApiEnvelope<{ token: string }>>("/account/login", input));
-}
-
-export function getAccountOrders(bearer: string): Promise<Order[]> {
-  return unwrap(
-    api.get<ApiEnvelope<Order[]>>("/account/orders", {
-      headers: { Authorization: `Bearer ${bearer}` },
-    }),
-  );
-}
-
-export function getPrefill(bearer: string): Promise<AccountPrefill> {
-  return unwrap(
-    api.get<ApiEnvelope<AccountPrefill>>("/account/prefill", {
-      headers: { Authorization: `Bearer ${bearer}` },
-    }),
-  );
-}
+// --- Account (Clerk-authenticated) — see lib/account.ts ---
