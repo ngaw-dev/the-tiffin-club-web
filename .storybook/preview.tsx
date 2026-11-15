@@ -1,18 +1,16 @@
 import type { Preview } from '@storybook/nextjs-vite'
+import { sb } from 'storybook/test'
 import '../app/globals.css'
-import { ThemeProvider } from 'next-themes'
-import type { ReactNode } from 'react'
-import { useEffect } from 'react'
+
+import { ForcedThemeProvider } from './theme-provider'
+
+// Fixture-backed mocks for data/auth-coupled components (orders page etc.).
+// Note: extensionless resolution fails here, hence the explicit .ts
+sb.mock(import('../lib/api.ts'))
+sb.mock(import('../lib/account.ts'))
+sb.mock(import('@clerk/nextjs'))
 
 type Theme = 'light' | 'dark'
-
-const ForcedThemeProvider = ({ children, theme }: { children: ReactNode; theme: Theme }) => {
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark')
-    document.documentElement.style.colorScheme = theme
-  }, [theme])
-  return <ThemeProvider attribute="class" forcedTheme={theme}>{children}</ThemeProvider>
-}
 
 const preview: Preview = {
   parameters: {
