@@ -40,10 +40,7 @@ export function HomeClient() {
   // if the array/object were rebuilt each time (addItem is a no-op then,
   // but React still warns on unstable effect deps).
   const dishes: MenuItem[] = useMemo(
-    () =>
-      (menu?.main ? [menu.main, ...menu.extras] : (menu?.extras ?? [])).map(
-        (item, i) => ({ ...item, id: i + 1 }), // positional ids per order API
-      ),
+    () => (menu?.main ? [menu.main, ...menu.extras] : (menu?.extras ?? [])),
     [menu],
   );
   const [mainItem, ...extras] = dishes;

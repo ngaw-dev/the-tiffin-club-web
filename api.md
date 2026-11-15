@@ -18,20 +18,24 @@ Every response uses the same envelope:
 
 ### Status codes
 
-| Code | Meaning                                                                |
-| ---- | ---------------------------------------------------------------------- |
-| 200  | OK                                                                     |
-| 201  | Created (order placed, account registered)                             |
-| 401  | Missing/invalid bearer token                                           |
-| 404  | Not found (also used for every order-lookup failure, so nothing leaks) |
-| 410  | Order manage token expired (past 23:59:59 on the order day)            |
-| 422  | Validation failed — `errors` maps field → messages                     |
-| 429  | Rate limited (account register/login: 10/min)                          |
+| Code | Meaning |
+|------|---------|
+| 200 | OK |
+| 201 | Created (order placed, account registered) |
+| 401 | Missing/invalid bearer token |
+| 404 | Not found (also used for every order-lookup failure, so nothing leaks) |
+| 410 | Order manage token expired (past 23:59:59 on the order day) |
+| 422 | Validation failed — `errors` maps field → messages |
+| 429 | Rate limited (account register/login: 10/min) |
 
 ### Money & times
 
 - All amounts are **cents** (`1600` = $16.00).
 - All dates/times are computed in `Pacific/Auckland`. Timestamps are ISO-8601; menu/ordering times are `HH:mm`.
+
+### Simulated time (non-production only)
+
+For QA/staging, any API request may carry `X-Simulated-Time: <ISO-8601 datetime>` (e.g. `2026-11-16T22:45:00+13:00`). The server treats that instant as "now" for every time-based rule (ordering window, today's menu, token expiry) and echoes the effective time back in the `X-App-Time-Now` response header. Unparseable value → **400**. The header is ignored entirely when `APP_ENV=production`.
 
 ### Domain notes
 
@@ -56,13 +60,15 @@ Public store settings. Read-only.
   "order_cutoff_time": "11:00",
   "pickup_start_time": "17:00",
   "pickup_end_time": "19:00",
-  "pickup_address": "12 Cuba St, Te Aro, Wellington",
-  "pickup_map_url": "https://maps.example.com/12-cuba-st",
   "store_phone": "021 123 4567",
   "store_phone_alternate": "04 555 1234",
-  "store_email": "hello@thetiffinclub.co.nz"
+  "store_email": "hello@thetiffinclub.co.nz",
+  "pickup_address": "123 Cuba Street, Te Aro, Wellington",
+  "pickup_map_url": "https://maps.example.com/..."
 }
 ```
+
+`pickup_map_url` is nullable (a maps deep link for the pickup address).
 
 ## Menu
 
@@ -76,8 +82,8 @@ Today's published menu plus the ordering window. Clients never compute open/clos
 {
   "status": "open",
   "date": "2026-11-15",
-  "main": { "name": "Butter Chicken", "description": "...", "price": 1600 },
-  "extras": [{ "name": "Garlic Naan", "description": null, "price": 400 }],
+  "main": { "id": 12, "name": "Butter Chicken", "description": "...", "price": 1600 },
+  "extras": [{ "id": 13, "name": "Garlic Naan", "description": null, "price": 400 }],
   "ordering": {
     "state": "open",
     "open": true,
@@ -117,7 +123,9 @@ Returned by every order endpoint (place, lookup, show, update, cancel):
     "suburb": "Te Aro"
   },
   "delivery_notes": "Knock twice",
-  "items": [{ "name": "Butter Chicken", "quantity": 2, "unit_price": 1600, "line_total": 3200 }],
+  "items": [
+    { "name": "Butter Chicken", "quantity": 2, "unit_price": 1600, "line_total": 3200 }
+  ],
   "total": 3600,
   "payment": "pay_in_person",
   "placed_at": "2026-11-15T10:00:00+13:00",
@@ -125,14 +133,14 @@ Returned by every order endpoint (place, lookup, show, update, cancel):
 }
 ```
 
-| Field            | Notes                                                                                                                                                                                                             |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `status`         | `placed` \| `confirmed` \| `ready_for_pickup` \| `out_for_delivery` \| `completed` \| `cancelled` — orders are returned as `confirmed` immediately on placement (auto-confirm; manual staff confirmation to come) |
-| `fulfilment`     | `pickup` \| `delivery`                                                                                                                                                                                            |
-| `customer`       | Live customer details at read time (not a placement snapshot) — absent if the relation isn't eager-loaded                                                                                                         |
-| `delivery_notes` | Free-text notes for the driver (e.g. access instructions)                                                                                                                                                         |
-| `total`          | Server-computed at menu prices, cents                                                                                                                                                                             |
-| `expires_at`     | The manage token's lifetime ends here — 23:59:59 on the order day                                                                                                                                                 |
+| Field | Notes |
+|-------|-------|
+| `status` | `placed` \| `confirmed` \| `ready_for_pickup` \| `out_for_delivery` \| `completed` \| `cancelled` — orders are returned as `confirmed` immediately on placement (auto-confirm; manual staff confirmation to come) |
+| `fulfilment` | `pickup` \| `delivery` |
+| `customer` | Live customer details at read time (not a placement snapshot) — absent if the relation isn't eager-loaded |
+| `delivery_notes` | Free-text notes for the driver (e.g. access instructions) |
+| `total` | Server-computed at menu prices, cents |
+| `expires_at` | The manage token's lifetime ends here — 23:59:59 on the order day |
 
 ### `POST /orders`
 
@@ -149,10 +157,7 @@ Place a guest order for today's menu. Returns **201** with the order object — 
   "address": "12 Cuba Street",
   "suburb": "Te Aro",
   "delivery_notes": "Knock twice",
-  "items": [
-    { "id": 3, "quantity": 2 },
-    { "id": 4, "quantity": 1 }
-  ]
+  "items": [{ "id": 3, "quantity": 2 }, { "id": 4, "quantity": 1 }]
 }
 ```
 
@@ -206,7 +211,7 @@ Edit an order before cutoff. All fields `sometimes`; item ids validated against 
 
 Applied fields: `fulfilment`, `delivery_notes`, `items`. Changing `fulfilment` to `delivery` does **not** re-validate a suburb (validate client-side against `GET /settings`). Errors: `422` (validation / off-menu items), **410** (expired), and `422` with `ordering` after cutoff.
 
-> ⚠️ Known gap: the request still _accepts_ `name`, `address`, `suburb` (validated then silently ignored — these now live on the customer). Email/phone are already rejected.
+> ⚠️ Known gap: the request still *accepts* `name`, `address`, `suburb` (validated then silently ignored — these now live on the customer). Email/phone are already rejected.
 
 ### `DELETE /orders/{token}`
 

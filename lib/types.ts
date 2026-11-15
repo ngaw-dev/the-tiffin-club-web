@@ -8,10 +8,7 @@ export interface ApiEnvelope<T> {
 }
 
 export interface MenuItem {
-  /**
-   * The API's menu response omits ids; the order endpoint requires integer
-   * ids matching the 1-based position on today's menu (main=1, then extras).
-   */
+  /** Server-assigned id (from GET /menu/today); sent as items.*.id when ordering. */
   id: number;
   name: string;
   description: string | null;
@@ -28,30 +25,12 @@ export interface OrderingWindow {
   closes_at: string | null; // HH:MM
 }
 
-export interface RawMenuItem {
-  name: string;
-  description: string | null;
-  price: number; // cents
-}
-
 export interface TodayMenu {
   status: "open" | "coming_soon";
   date: string | null;
-  main: RawMenuItem | null;
-  extras: RawMenuItem[];
+  main: MenuItem | null;
+  extras: MenuItem[];
   ordering: OrderingWindow;
-}
-
-/** Assign positional ids (main=1, then extras) as the order API expects. */
-export function withIds(
-  menu: TodayMenu,
-): TodayMenu & { main: MenuItem | null; extras: MenuItem[] } {
-  let next = 1;
-  return {
-    ...menu,
-    main: menu.main ? { ...menu.main, id: next++ } : null,
-    extras: menu.extras.map((e) => ({ ...e, id: next++ })),
-  };
 }
 
 export interface StoreSettings {
