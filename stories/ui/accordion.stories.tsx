@@ -1,18 +1,18 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion'
+} from "@/components/ui/accordion";
 
 const meta: Meta<typeof Accordion> = {
-  title: 'UI/Accordion',
+  title: "UI/Accordion",
   component: Accordion,
-}
+};
 
-export default meta
-type Story = StoryObj<typeof Accordion>
+export default meta;
+type Story = StoryObj<typeof Accordion>;
 
 const render = (defaultValue?: string) => () => (
   <Accordion type="single" collapsible defaultValue={defaultValue} className="w-full max-w-md">
@@ -29,7 +29,7 @@ const render = (defaultValue?: string) => () => (
       </AccordionContent>
     </AccordionItem>
   </Accordion>
-)
+);
 
-export const Collapsed: Story = { render: render() }
-export const FirstOpen: Story = { render: render('faq-1') }
+export const Collapsed: Story = { render: render() };
+export const FirstOpen: Story = { render: render("faq-1") };

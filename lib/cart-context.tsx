@@ -47,9 +47,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         // No-op when the quantity wouldn't change (capped at 20).
         const target = Math.min(20, existing.quantity + quantity);
         if (target === existing.quantity) return prev;
-        return prev.map((l) =>
-          l.item.id === item.id ? { ...l, quantity: target } : l,
-        );
+        return prev.map((l) => (l.item.id === item.id ? { ...l, quantity: target } : l));
       }
       return [...prev, { item, quantity: Math.min(20, Math.max(1, quantity)) }];
     });

@@ -1,19 +1,19 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const meta: Meta<typeof Tabs> = {
-  title: 'UI/Tabs',
+  title: "UI/Tabs",
   component: Tabs,
   argTypes: {
     orientation: {
-      control: 'radio',
-      options: ['horizontal', 'vertical'],
+      control: "radio",
+      options: ["horizontal", "vertical"],
     },
   },
-}
+};
 
-export default meta
-type Story = StoryObj<typeof Tabs>
+export default meta;
+type Story = StoryObj<typeof Tabs>;
 
 export const Default: Story = {
   render: ({ orientation }) => (
@@ -28,4 +28,4 @@ export const Default: Story = {
       <TabsContent value="one-off">Single tiffin, delivered tomorrow.</TabsContent>
     </Tabs>
   ),
-}
+};

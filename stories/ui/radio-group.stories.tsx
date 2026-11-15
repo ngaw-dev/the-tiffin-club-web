@@ -1,14 +1,14 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Label } from '@/components/ui/label'
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 const meta: Meta<typeof RadioGroup> = {
-  title: 'UI/Radio Group',
+  title: "UI/Radio Group",
   component: RadioGroup,
-}
+};
 
-export default meta
-type Story = StoryObj<typeof RadioGroup>
+export default meta;
+type Story = StoryObj<typeof RadioGroup>;
 
 const render = (defaultValue?: string) => () => (
   <RadioGroup defaultValue={defaultValue} className="gap-3">
@@ -21,8 +21,8 @@ const render = (defaultValue?: string) => () => (
       <Label htmlFor="r-delivery">Delivery</Label>
     </div>
   </RadioGroup>
-)
+);
 
-export const Unselected: Story = { render: render() }
-export const PickupSelected: Story = { render: render('pickup') }
-export const DeliverySelected: Story = { render: render('delivery') }
+export const Unselected: Story = { render: render() };
+export const PickupSelected: Story = { render: render("pickup") };
+export const DeliverySelected: Story = { render: render("delivery") };

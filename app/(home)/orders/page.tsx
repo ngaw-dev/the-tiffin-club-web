@@ -219,9 +219,7 @@ function OrderClient() {
                         {order.fulfilment}
                       </Badge>
                       {done ? (
-                        <Badge
-                          variant={order.status === "cancelled" ? "destructive" : "secondary"}
-                        >
+                        <Badge variant={order.status === "cancelled" ? "destructive" : "secondary"}>
                           {order.status === "cancelled" ? "CANCELLED" : "COMPLETED"}
                         </Badge>
                       ) : (

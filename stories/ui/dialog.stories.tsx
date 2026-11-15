@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { Button } from '@/components/ui/button'
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -9,29 +9,29 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog";
 interface DialogStoryArgs {
-  title: string
-  description: string
+  title: string;
+  description: string;
 }
 
 const meta: Meta<DialogStoryArgs> = {
-  title: 'UI/Dialog',
+  title: "UI/Dialog",
   component: DialogTrigger,
   argTypes: {
-    title: { control: 'text' },
-    description: { control: 'text' },
+    title: { control: "text" },
+    description: { control: "text" },
   },
-}
+};
 
-export default meta
-type Story = StoryObj<DialogStoryArgs>
+export default meta;
+type Story = StoryObj<DialogStoryArgs>;
 
 export const Default: Story = {
   args: {
-    title: 'Cancel subscription?',
+    title: "Cancel subscription?",
     description:
-      'Your remaining tiffins this week will still be delivered. You can resubscribe anytime.',
+      "Your remaining tiffins this week will still be delivered. You can resubscribe anytime.",
   },
   render: ({ title, description }) => (
     <Dialog>
@@ -54,4 +54,4 @@ export const Default: Story = {
       </DialogContent>
     </Dialog>
   ),
-}
+};

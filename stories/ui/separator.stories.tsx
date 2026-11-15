@@ -1,16 +1,16 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { Separator } from '@/components/ui/separator'
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Separator } from "@/components/ui/separator";
 
 const meta: Meta<typeof Separator> = {
-  title: 'UI/Separator',
+  title: "UI/Separator",
   component: Separator,
-}
+};
 
-export default meta
-type Story = StoryObj<typeof Separator>
+export default meta;
+type Story = StoryObj<typeof Separator>;
 
 export const Horizontal: Story = {
-  args: { className: 'w-64' },
+  args: { className: "w-64" },
   render: (args) => (
     <div className="p-4">
       <p className="text-sm">Above</p>
@@ -18,7 +18,7 @@ export const Horizontal: Story = {
       <p className="text-sm">Below</p>
     </div>
   ),
-}
+};
 
 export const Vertical: Story = {
   render: () => (
@@ -28,4 +28,4 @@ export const Vertical: Story = {
       <span className="text-sm">Right</span>
     </div>
   ),
-}
+};

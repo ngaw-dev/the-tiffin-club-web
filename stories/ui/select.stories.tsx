@@ -1,28 +1,34 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import * as React from 'react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import * as React from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface SelectStoryArgs {
-  disabled: boolean
-  placeholder: string
+  disabled: boolean;
+  placeholder: string;
 }
 
 const meta: Meta<SelectStoryArgs> = {
-  title: 'UI/Select',
+  title: "UI/Select",
   component: SelectTrigger,
   argTypes: {
-    disabled: { control: 'boolean' },
-    placeholder: { control: 'text' },
+    disabled: { control: "boolean" },
+    placeholder: { control: "text" },
   },
-}
+};
 
-export default meta
-type Story = StoryObj<SelectStoryArgs>
+export default meta;
+type Story = StoryObj<SelectStoryArgs>;
 
-const meals = ['Breakfast', 'Lunch', 'Dinner', 'Snack']
+const meals = ["Breakfast", "Lunch", "Dinner", "Snack"];
 
 export const Default: Story = {
-  args: { disabled: false, placeholder: 'Choose a meal' },
+  args: { disabled: false, placeholder: "Choose a meal" },
   render: ({ disabled, placeholder }) => (
     <Select defaultValue="Lunch">
       <SelectTrigger className="w-[180px]" disabled={disabled}>
@@ -37,11 +43,11 @@ export const Default: Story = {
       </SelectContent>
     </Select>
   ),
-}
+};
 
 export const Controlled: Story = {
   render: () => {
-    const [value, setValue] = React.useState<string>()
+    const [value, setValue] = React.useState<string>();
     return (
       <div className="grid max-w-xs gap-2">
         <Select value={value} onValueChange={setValue}>
@@ -56,8 +62,8 @@ export const Controlled: Story = {
             ))}
           </SelectContent>
         </Select>
-        <p className="text-sm text-muted-foreground">Selected: {value ?? 'none'}</p>
+        <p className="text-sm text-muted-foreground">Selected: {value ?? "none"}</p>
       </div>
-    )
+    );
   },
-}
+};

@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { Skeleton } from '@/components/ui/skeleton'
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const meta: Meta<typeof Skeleton> = {
-  title: 'UI/Skeleton',
+  title: "UI/Skeleton",
   component: Skeleton,
-}
+};
 
-export default meta
-type Story = StoryObj<typeof Skeleton>
+export default meta;
+type Story = StoryObj<typeof Skeleton>;
 
 /** Order-card-shaped loading state. */
 export const OrderCardSkeleton: Story = {
@@ -28,4 +28,4 @@ export const OrderCardSkeleton: Story = {
       <Skeleton className="h-4 w-1/2" />
     </div>
   ),
-}
+};
