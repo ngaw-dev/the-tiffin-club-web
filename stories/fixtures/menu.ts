@@ -63,6 +63,7 @@ export const settings: StoreSettings = {
   order_cutoff_time: "13:00",
   pickup_start_time: "16:30",
   pickup_end_time: "19:00",
+  pickup_address: "12 Cuba St, Te Aro, Wellington",
   store_phone: "+64 4 555 0123",
   store_phone_alternate: "",
   store_email: "hello@thetiffinclub.nz",

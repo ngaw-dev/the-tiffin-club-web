@@ -270,6 +270,7 @@ function OrderClient() {
             key={selected.manage_token}
             order={selected}
             cutoffTime={cutoffTime}
+            pickupAddress={settingsQuery.data?.pickup_address ?? null}
             onCancel={() => setCancelToken(selected.manage_token)}
             className=""
           />

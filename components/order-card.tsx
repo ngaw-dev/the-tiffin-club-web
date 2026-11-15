@@ -12,11 +12,13 @@ import { FulfilmentStepper } from "@/app/(home)/fulfilment-stepper";
 export function OrderCard({
   order,
   cutoffTime = null,
+  pickupAddress = null,
   onCancel,
   className = "mt-8",
 }: {
   order: Order;
   cutoffTime?: string | null;
+  pickupAddress?: string | null;
   onCancel?: () => void;
   className?: string;
 }) {
@@ -48,10 +50,21 @@ export function OrderCard({
             <dt className="text-muted-foreground">Fulfilment</dt>
             <dd className="capitalize">{order.fulfilment}</dd>
           </div>
-          {order.customer?.suburb ? (
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Suburb</dt>
-              <dd>{order.customer.suburb}</dd>
+          {order.fulfilment === "pickup" ? (
+            pickupAddress ? (
+              <div className="flex justify-between gap-3">
+                <dt className="shrink-0 text-muted-foreground">Pickup address</dt>
+                <dd className="text-right">{pickupAddress}</dd>
+              </div>
+            ) : null
+          ) : order.customer?.address ? (
+            <div className="flex justify-between gap-3">
+              <dt className="shrink-0 text-muted-foreground">Delivery address</dt>
+              <dd className="text-right">
+                {[order.customer.address, order.customer.suburb]
+                  .filter(Boolean)
+                  .join(", ")}
+              </dd>
             </div>
           ) : null}
         </dl>

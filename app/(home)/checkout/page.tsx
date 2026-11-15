@@ -165,7 +165,17 @@ export default function CheckoutPage() {
           <CheckoutItems lines={lines} onQuantityChange={setQuantity} />
         </div>
 
-        <OrderSummary lines={lines} total={total} fulfilment={fulfilment} submitting={submitting} />
+        <OrderSummary
+          lines={lines}
+          total={total}
+          fulfilment={fulfilment}
+          address={
+            fulfilment === "pickup"
+              ? settings?.pickup_address ?? null
+              : [form.address, form.suburb].filter(Boolean).join(", ") || null
+          }
+          submitting={submitting}
+        />
       </form>
 
       <Toaster richColors position="top-center" />

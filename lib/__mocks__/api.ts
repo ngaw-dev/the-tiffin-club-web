@@ -7,6 +7,7 @@ let settings: StoreSettings = {
   order_cutoff_time: "20:45",
   pickup_start_time: "17:30",
   pickup_end_time: "19:00",
+  pickup_address: "12 Cuba St, Te Aro, Wellington",
   store_phone: "+61 400 000 000",
   store_phone_alternate: "+61 400 000 001",
   store_email: "hello@tiffinclub.example",

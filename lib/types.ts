@@ -59,6 +59,7 @@ export interface StoreSettings {
   order_cutoff_time: string; // HH:MM
   pickup_start_time: string | null;
   pickup_end_time: string | null;
+  pickup_address: string | null;
   store_phone: string;
   store_phone_alternate: string;
   store_email: string;

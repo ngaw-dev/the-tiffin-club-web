@@ -10,11 +10,13 @@ export function OrderSummary({
   lines,
   total,
   fulfilment,
+  address,
   submitting,
 }: {
   lines: CartLine[];
   total: number;
   fulfilment: "pickup" | "delivery";
+  address?: string | null;
   submitting?: boolean;
 }) {
   return (
@@ -34,6 +36,14 @@ export function OrderSummary({
         <span>Total</span>
         <span className="ttc-num">{formatMoney(total)}</span>
       </div>
+      {address ? (
+        <div className="mt-3 rounded-lg bg-secondary px-3 py-2.5 text-xs text-secondary-foreground">
+          <span className="font-semibold">
+            {fulfilment === "pickup" ? "Pickup" : "Delivery"} address:
+          </span>{" "}
+          {address}
+        </div>
+      ) : null}
       <p className="mt-2 rounded-lg bg-secondary px-3 py-2.5 text-xs text-secondary-foreground">
         Pay in person at {fulfilment === "pickup" ? "pickup" : "delivery"}.
       </p>
@@ -44,7 +54,9 @@ export function OrderSummary({
         disabled={submitting}
         className="mt-5 min-h-11 w-full rounded-lg font-semibold"
       >
-        {submitting ? "Placing order…" : `Place order · ${formatMoney(total)}`}
+        {submitting
+          ? "Placing order…"
+          : `Place ${fulfilment} order · ${formatMoney(total)}`}
       </Button>
       <p className="mt-3 text-xs text-muted-foreground">
         Need to change something?{" "}
