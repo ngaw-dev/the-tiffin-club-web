@@ -20,6 +20,14 @@ type Theme = "light" | "dark";
 const preview: Preview = {
   parameters: {
     layout: "fullscreen",
+    viewport: {
+      viewports: {
+        mobile: { name: "Mobile", styles: { width: "390px", height: "844px" } },
+        tablet: { name: "Tablet", styles: { width: "820px", height: "1180px" } },
+        desktop: { name: "Desktop", styles: { width: "1280px", height: "900px" } },
+      },
+      defaultViewport: "desktop",
+    },
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -59,5 +67,3 @@ const preview: Preview = {
     ),
   ],
 };
-
-export default preview;
