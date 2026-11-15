@@ -12,9 +12,6 @@ export function HeaderAuth() {
         <Link href="/order">My order</Link>
       </Button>
       <Show when="signed-in">
-        <Button asChild variant="link" className="min-h-11 px-3 py-2 text-sm font-medium">
-          <Link href="/orders">My orders</Link>
-        </Button>
         <UserButton />
       </Show>
       <Show when="signed-out">

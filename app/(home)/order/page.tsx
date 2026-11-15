@@ -6,18 +6,17 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast, Toaster } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getOrder, getSettings, lookupOrder } from "@/lib/api";
-import { formatMoney } from "@/lib/format";
+import { getMyOrders } from "@/lib/account";
 import { todayOrders } from "@/lib/order-store";
 import { CancelOrderDialog } from "@/app/(home)/cancel-order-dialog";
+import { useAuth } from "@clerk/nextjs";
 import type { Order } from "@/lib/types";
-import { FulfilmentStepper } from "@/app/(home)/fulfilment-stepper";
+import { OrderCard as SharedOrderCard } from "@/components/order-card";
 
 export default function OrderPage() {
   return (
@@ -31,6 +30,18 @@ function OrderClient() {
   const params = useSearchParams();
   const urlToken = params.get("token");
   const placed = params.get("placed") === "1";
+  // Signed-in users see their full account history (/my-orders); guests keep
+  // the manage-token view (localStorage + URL token + manual lookup).
+  const { isSignedIn, getToken } = useAuth();
+  const myOrdersQuery = useQuery({
+    queryKey: ["account", "orders"],
+    queryFn: async () => {
+      const token = await getToken();
+      if (!token) throw new Error("Not signed in");
+      return getMyOrders(token);
+    },
+    enabled: isSignedIn === true,
+  });
 
   // Stored tokens for today; URL token (share/refresh fallback) takes priority.
   // localStorage is browser-only, so storage is read after mount — reading it
@@ -64,9 +75,11 @@ function OrderClient() {
   const cutoffTime = settingsQuery.data?.order_cutoff_time ?? null;
   const orders = ordersQuery.data ?? [];
 
+  const accountOrders = myOrdersQuery.data ?? [];
+
   // mounted=false means localStorage hasn't been read yet — show the same
   // loading state SSR rendered, so server and client agree on first paint.
-  if (!mounted || ordersQuery.isLoading) {
+  if (!mounted || ordersQuery.isLoading || myOrdersQuery.isPending) {
     return (
       <div className="mx-auto max-w-xl px-4 py-20 text-center text-sm text-muted-foreground sm:px-6">
         Loading your order…
@@ -74,22 +87,25 @@ function OrderClient() {
     );
   }
 
-  if (!orders.length && !lookupOrders.length) {
+  const allOrders = [
+    ...(isSignedIn ? accountOrders : []),
+    ...lookupOrders,
+    ...(!isSignedIn ? orders : []),
+  ].filter((o, i, arr) => arr.findIndex((x) => x.manage_token === o.manage_token) === i);
+
+  if (!allOrders.length) {
     return (
       <div className="mx-auto max-w-xl px-4 py-20 text-center sm:px-6">
         <h1 className="font-display text-2xl font-semibold sm:text-3xl">No order found</h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          We couldn&apos;t find an order on this device. Use the lookup below with your manage token
-          and contact details.
+          {isSignedIn
+            ? "You haven't placed any orders yet — today's menu is waiting."
+            : "We couldn't find an order on this device. Use the lookup below with your manage token and contact details."}
         </p>
         <Toaster richColors position="top-center" />
       </div>
     );
   }
-
-  const allOrders = [...lookupOrders, ...orders].filter(
-    (o, i, arr) => arr.findIndex((x) => x.manage_token === o.manage_token) === i,
-  );
 
   return (
     <div className="mx-auto max-w-2xl px-4 pb-16 pt-10 sm:px-6">
@@ -105,7 +121,7 @@ function OrderClient() {
       )}
 
       {allOrders.map((order) => (
-        <OrderCard
+        <SharedOrderCard
           key={order.manage_token}
           order={order}
           cutoffTime={cutoffTime}
@@ -113,7 +129,9 @@ function OrderClient() {
         />
       ))}
 
-      <LookupSection onFound={(o) => setLookupOrders((prev) => [o, ...prev])} />
+      {isSignedIn !== true && (
+        <LookupSection onFound={(o) => setLookupOrders((prev) => [o, ...prev])} />
+      )}
 
       {cancelToken && (
         <CancelOrderDialog
@@ -125,6 +143,7 @@ function OrderClient() {
             const next = tokens.filter((t) => t !== cancelToken);
             setTokens(next);
             ordersQuery.refetch();
+            myOrdersQuery.refetch();
           }}
         />
       )}
@@ -136,79 +155,6 @@ function OrderClient() {
       </div>
       <Toaster richColors position="top-center" />
     </div>
-  );
-}
-
-function OrderCard({
-  order,
-  cutoffTime,
-  onCancel,
-}: {
-  order: Order;
-  cutoffTime: string | null;
-  onCancel: () => void;
-}) {
-  const cancelled = order.status === "cancelled";
-  // Orders past expiry (23:59:59 order day) can no longer be managed.
-  const expired = new Date(order.expires_at).getTime() <= Date.now();
-
-  return (
-    <Card className="mt-8 rounded-lg">
-      <CardHeader className="p-6 pb-0">
-        <CardTitle className="flex items-center gap-2 font-display text-lg font-semibold">
-          Your order
-          <Badge variant={cancelled ? "destructive" : "secondary"}>{order.status}</Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-6 pt-4">
-        {cancelled && (
-          <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            This order was cancelled.
-          </div>
-        )}
-        <FulfilmentStepper status={order.status} fulfilment={order.fulfilment} />
-        <dl className="mt-6 space-y-1 text-sm">
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">Fulfilment</dt>
-            <dd className="capitalize">{order.fulfilment}</dd>
-          </div>
-          {order.customer?.suburb ? (
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Suburb</dt>
-              <dd>{order.customer.suburb}</dd>
-            </div>
-          ) : null}
-        </dl>
-
-        <Separator className="my-4" />
-        <ul className="space-y-2 text-sm">
-          {order.items.map((it, i) => (
-            <li key={i} className="flex justify-between">
-              <span>
-                {it.quantity} × {it.name}
-              </span>
-              <span className="ttc-num">{formatMoney(it.unit_price * it.quantity)}</span>
-            </li>
-          ))}
-        </ul>
-        <Separator className="my-4" />
-        <div className="flex justify-between font-semibold">
-          <span>Total (pay in person)</span>
-          <span className="ttc-num">{formatMoney(order.total)}</span>
-        </div>
-
-        {!cancelled && !expired && (
-          <Button
-            variant="link"
-            onClick={onCancel}
-            className="mt-5 min-h-11 px-0 text-sm font-normal text-muted-foreground underline-offset-4 hover:text-destructive"
-          >
-            Cancel order
-            {cutoffTime ? ` (until ${cutoffTime})` : ""}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
   );
 }
 

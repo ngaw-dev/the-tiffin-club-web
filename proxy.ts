@@ -2,14 +2,11 @@ import { clerkMiddleware } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 /**
- * Clerk runs on every page request (matcher below); only /orders requires
- * sign-in. /order (today's manage-token orders), /checkout and the auth
- * pages stay public — guest ordering works without an account.
+ * Clerk runs on every page request (matcher below); /order stays public —
+ * guests manage today's orders via manage tokens, and signed-in users get
+ * their full account history on the same page. Only auth pages are dynamic.
  */
-export default clerkMiddleware(async (auth, request) => {
-  if (request.nextUrl.pathname === "/orders") {
-    await auth.protect();
-  }
+export default clerkMiddleware(async (_auth, _request) => {
   return NextResponse.next();
 });
 
