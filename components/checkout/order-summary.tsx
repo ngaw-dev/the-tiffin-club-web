@@ -11,12 +11,14 @@ export function OrderSummary({
   total,
   fulfilment,
   address,
+  mapUrl,
   submitting,
 }: {
   lines: CartLine[];
   total: number;
   fulfilment: "pickup" | "delivery";
   address?: string | null;
+  mapUrl?: string | null;
   submitting?: boolean;
 }) {
   return (
@@ -41,7 +43,18 @@ export function OrderSummary({
           <span className="font-semibold">
             {fulfilment === "pickup" ? "Pickup" : "Delivery"} address:
           </span>{" "}
-          {address}
+          {mapUrl ? (
+            <a
+              href={mapUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-4 hover:text-primary"
+            >
+              {address}
+            </a>
+          ) : (
+            address
+          )}
         </div>
       ) : null}
       <p className="mt-2 rounded-lg bg-secondary px-3 py-2.5 text-xs text-secondary-foreground">

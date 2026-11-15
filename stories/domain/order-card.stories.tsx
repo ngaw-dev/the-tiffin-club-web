@@ -28,6 +28,7 @@ const render =
         order={order}
         cutoffTime={withCancel ? "20:45" : null}
         pickupAddress={settings.pickup_address}
+        pickupMapUrl={settings.pickup_map_url}
         onCancel={withCancel ? () => {} : undefined}
         className=""
       />

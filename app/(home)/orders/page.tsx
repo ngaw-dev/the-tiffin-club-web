@@ -271,6 +271,7 @@ function OrderClient() {
             order={selected}
             cutoffTime={cutoffTime}
             pickupAddress={settingsQuery.data?.pickup_address ?? null}
+            pickupMapUrl={settingsQuery.data?.pickup_map_url ?? null}
             onCancel={() => setCancelToken(selected.manage_token)}
             className=""
           />

@@ -19,6 +19,7 @@ export const Pickup: Story = {
       total={total}
       fulfilment="pickup"
       address={settings.pickup_address}
+      mapUrl={settings.pickup_map_url}
     />
   ),
 };

@@ -60,6 +60,7 @@ export interface StoreSettings {
   pickup_start_time: string | null;
   pickup_end_time: string | null;
   pickup_address: string | null;
+  pickup_map_url: string | null;
   store_phone: string;
   store_phone_alternate: string;
   store_email: string;

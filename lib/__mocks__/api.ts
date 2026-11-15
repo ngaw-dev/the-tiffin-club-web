@@ -8,6 +8,7 @@ let settings: StoreSettings = {
   pickup_start_time: "17:30",
   pickup_end_time: "19:00",
   pickup_address: "12 Cuba St, Te Aro, Wellington",
+  pickup_map_url: "https://maps.example.com/12-cuba-st",
   store_phone: "+61 400 000 000",
   store_phone_alternate: "+61 400 000 001",
   store_email: "hello@tiffinclub.example",

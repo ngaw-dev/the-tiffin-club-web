@@ -13,12 +13,14 @@ export function OrderCard({
   order,
   cutoffTime = null,
   pickupAddress = null,
+  pickupMapUrl = null,
   onCancel,
   className = "mt-8",
 }: {
   order: Order;
   cutoffTime?: string | null;
   pickupAddress?: string | null;
+  pickupMapUrl?: string | null;
   onCancel?: () => void;
   className?: string;
 }) {
@@ -54,7 +56,20 @@ export function OrderCard({
             pickupAddress ? (
               <div className="flex justify-between gap-3">
                 <dt className="shrink-0 text-muted-foreground">Pickup address</dt>
-                <dd className="text-right">{pickupAddress}</dd>
+                <dd className="text-right">
+                  {pickupMapUrl ? (
+                    <a
+                      href={pickupMapUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline underline-offset-4 hover:text-primary"
+                    >
+                      {pickupAddress}
+                    </a>
+                  ) : (
+                    pickupAddress
+                  )}
+                </dd>
               </div>
             ) : null
           ) : order.customer?.address ? (
