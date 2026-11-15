@@ -102,7 +102,7 @@ export default function CheckoutPage() {
       toast.success("Order placed! We'll see you soon.");
       clear();
       rememberOrder(order.manage_token);
-      router.push(`/order?token=${order.manage_token}&placed=1`);
+      router.push(`/orders?token=${order.manage_token}&placed=1`);
     } catch (err) {
       const apiErr = err instanceof ApiError ? err : null;
       if (apiErr?.status === 422 && apiErr.ordering) {

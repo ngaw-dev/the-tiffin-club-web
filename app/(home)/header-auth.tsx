@@ -9,7 +9,7 @@ export function HeaderAuth() {
   return (
     <span className="flex items-center gap-1">
       <Button asChild variant="link" className="min-h-11 px-3 py-2 text-sm font-medium">
-        <Link href="/order">My order</Link>
+        <Link href="/orders">My orders</Link>
       </Button>
       <Show when="signed-in">
         <UserButton />
