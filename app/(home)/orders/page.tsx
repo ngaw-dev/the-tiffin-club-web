@@ -79,7 +79,9 @@ function OrderClient() {
 
   // mounted=false means localStorage hasn't been read yet — show the same
   // loading state SSR rendered, so server and client agree on first paint.
-  if (!mounted || ordersQuery.isLoading || myOrdersQuery.isPending) {
+  // A disabled query stays pending forever (guests), so gate on isSignedIn.
+  const loadingAccountOrders = isSignedIn === true && myOrdersQuery.isPending;
+  if (!mounted || ordersQuery.isLoading || loadingAccountOrders) {
     return (
       <div className="mx-auto max-w-xl px-4 py-20 text-center text-sm text-muted-foreground sm:px-6">
         Loading your order…

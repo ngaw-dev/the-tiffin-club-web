@@ -46,12 +46,15 @@ export function CancelOrderDialog({
 
   return (
     <Dialog open={open} onOpenChange={busy ? undefined : onOpenChange}>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Cancel this order?</DialogTitle>
           <DialogDescription>
-            This can&apos;t be undone.
-            {cutoffTime ? ` You can cancel until ${cutoffTime}.` : ""}
+            Your tiffin order will be cancelled and won&apos;t be prepared. You won&apos;t be
+            charged anything (payment happens in person). This can&apos;t be undone, but you can
+            always place a new order
+            {cutoffTime ? ` before the ${cutoffTime} cutoff` : " while the ordering window is open"}
+            .
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2">

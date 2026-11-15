@@ -31,7 +31,7 @@ export function OrderCard({
       <CardHeader className="p-6 pb-0">
         <CardTitle className="flex items-center gap-2 font-display text-lg font-semibold">
           Your order
-          <Badge variant={cancelled ? "destructive" : "secondary"}>{order.status}</Badge>
+          <Badge variant={cancelled ? "destructive" : "secondary"}>{order.status.toUpperCase()}</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 pt-4">
