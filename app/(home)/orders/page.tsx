@@ -6,16 +6,19 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast, Toaster } from "sonner";
+import { ArrowLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getOrder, getSettings, lookupOrder } from "@/lib/api";
+import { formatMoney } from "@/lib/format";
 import { getMyOrders } from "@/lib/account";
 import { todayOrders } from "@/lib/order-store";
 import { CancelOrderDialog } from "@/app/(home)/cancel-order-dialog";
 import { useAuth } from "@clerk/nextjs";
-import type { Order } from "@/lib/types";
+import type { Fulfilment, Order, OrderStatus } from "@/lib/types";
 import { OrderCard as SharedOrderCard } from "@/components/order-card";
 
 export default function OrderPage() {
@@ -24,6 +27,29 @@ export default function OrderPage() {
       <OrderClient />
     </Suspense>
   );
+}
+
+const stepTitles: Record<string, string> = {
+  placed: "Placed",
+  confirmed: "Confirmed",
+  ready_for_pickup: "Ready for pickup",
+  out_for_delivery: "Out for delivery",
+  completed: "Completed",
+};
+
+/** Compact "step X of N — Current" summary for list rows. */
+function stepSummary(status: OrderStatus, fulfilment: Fulfilment) {
+  const steps =
+    fulfilment === "pickup"
+      ? ["placed", "confirmed", "ready_for_pickup", "completed"]
+      : ["placed", "confirmed", "out_for_delivery", "completed"];
+  const index = steps.indexOf(status);
+  const current = index >= 0 ? status : "placed";
+  return {
+    label: stepTitles[current] ?? String(current),
+    step: (index >= 0 ? index : 0) + 1,
+    total: steps.length,
+  };
 }
 
 function OrderClient() {
@@ -59,6 +85,9 @@ function OrderClient() {
   const [cancelToken, setCancelToken] = useState<string | null>(null);
   // Orders recovered via manual lookup, shown below stored ones.
   const [lookupOrders, setLookupOrders] = useState<Order[]>([]);
+  // Client-side selection for the master-detail split; null only when the
+  // list is empty (first order auto-selected once data arrives).
+  const [selectedToken, setSelectedToken] = useState<string | null>(urlToken);
 
   const ordersQuery = useQuery({
     queryKey: ["orders", tokens],
@@ -84,7 +113,7 @@ function OrderClient() {
   if (!mounted || ordersQuery.isLoading || loadingAccountOrders) {
     return (
       <div className="mx-auto max-w-xl px-4 py-20 text-center text-sm text-muted-foreground sm:px-6">
-        Loading your order…
+        Loading your orders…
       </div>
     );
   }
@@ -93,7 +122,9 @@ function OrderClient() {
     ...(isSignedIn ? accountOrders : []),
     ...lookupOrders,
     ...(!isSignedIn ? orders : []),
-  ].filter((o, i, arr) => arr.findIndex((x) => x.manage_token === o.manage_token) === i);
+  ]
+    .filter((o, i, arr) => arr.findIndex((x) => x.manage_token === o.manage_token) === i)
+    .sort((a, b) => b.placed_at.localeCompare(a.placed_at));
 
   if (!allOrders.length) {
     return (
@@ -104,36 +135,117 @@ function OrderClient() {
             ? "You haven't placed any orders yet — today's menu is waiting."
             : "We couldn't find an order on this device. Use the lookup below with your manage token and contact details."}
         </p>
+        {isSignedIn !== true && (
+          <LookupSection
+            onFound={(o) => {
+              setLookupOrders((prev) => [o, ...prev]);
+              setSelectedToken(o.manage_token);
+            }}
+          />
+        )}
         <Toaster richColors position="top-center" />
       </div>
     );
   }
 
+  const selected =
+    allOrders.find((o) => o.manage_token === selectedToken) ?? allOrders[0];
+
   return (
-    <div className="mx-auto max-w-2xl px-4 pb-16 pt-10 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 pb-16 pt-10 sm:px-6">
       {placed && (
-        <div className="rounded-lg border border-border bg-primary/5 p-5 text-center">
+        <div className="mb-6 rounded-lg border border-border bg-primary/5 p-5 text-center">
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">Order placed!</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             We&apos;ll see you soon
-            {allOrders[0].customer?.name ? `, ${allOrders[0].customer.name}` : ""}. Pay in person at{" "}
-            {allOrders[0].fulfilment === "pickup" ? "pickup" : "delivery"}.
+            {selected.customer?.name ? `, ${selected.customer.name}` : ""}. Pay in person at{" "}
+            {selected.fulfilment === "pickup" ? "pickup" : "delivery"}.
           </p>
         </div>
       )}
 
-      {allOrders.map((order) => (
-        <SharedOrderCard
-          key={order.manage_token}
-          order={order}
-          cutoffTime={cutoffTime}
-          onCancel={() => setCancelToken(order.manage_token)}
-        />
-      ))}
+      <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+        {/* Left: order list (hidden on mobile once a detail is open) */}
+        <div className={selectedToken ? "hidden md:block" : "block"}>
+          <ul className="space-y-3">
+            {allOrders.map((order) => {
+              const done = order.status === "completed" || order.status === "cancelled";
+              const summary = stepSummary(order.status, order.fulfilment);
+              const active = order.manage_token === selected.manage_token;
+              return (
+                <li key={order.manage_token}>
+                  <button
+                    type="button"
+                    aria-current={active ? "true" : undefined}
+                    onClick={() => setSelectedToken(order.manage_token)}
+                    className={`w-full rounded-lg border p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-sm ${
+                      active
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-foreground/25 hover:bg-accent"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2 text-sm">
+                      <span className="font-medium">
+                        {new Date(order.placed_at).toLocaleDateString(undefined, {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "short",
+                        })}
+                      </span>
+                      <span className="ttc-num font-medium">{formatMoney(order.total)}</span>
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <Badge variant="secondary" className="capitalize">
+                        {order.fulfilment}
+                      </Badge>
+                      {done ? (
+                        <Badge
+                          variant={order.status === "cancelled" ? "destructive" : "secondary"}
+                        >
+                          {order.status === "cancelled" ? "CANCELLED" : "COMPLETED"}
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">
+                          {summary.step}/{summary.total} · {summary.label}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
 
-      {isSignedIn !== true && (
-        <LookupSection onFound={(o) => setLookupOrders((prev) => [o, ...prev])} />
-      )}
+          {isSignedIn !== true && (
+            <LookupSection
+              onFound={(o) => {
+                setLookupOrders((prev) => [o, ...prev]);
+                setSelectedToken(o.manage_token);
+              }}
+            />
+          )}
+        </div>
+
+        {/* Right: selected order details */}
+        <div className={selectedToken ? "block" : "hidden md:block"}>
+          {/* Mobile back-to-list affordance */}
+          <Button
+            variant="ghost"
+            className="mb-2 min-h-11 px-2 md:hidden"
+            onClick={() => setSelectedToken(null)}
+          >
+            <ArrowLeft className="mr-2 size-4" />
+            Back to orders
+          </Button>
+          <SharedOrderCard
+            key={selected.manage_token}
+            order={selected}
+            cutoffTime={cutoffTime}
+            onCancel={() => setCancelToken(selected.manage_token)}
+            className=""
+          />
+        </div>
+      </div>
 
       {cancelToken && (
         <CancelOrderDialog
