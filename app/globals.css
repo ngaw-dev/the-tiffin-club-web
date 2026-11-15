@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "@clerk/ui/themes/shadcn.css";
 
+/* Explicit sources: the Tailwind Vite plugin (Storybook) can't see classes
+   through Storybook's virtual module graph; Turbopack ignores these. */
+@source "../app/**/*.{ts,tsx}";
+@source "../components/**/*.{ts,tsx}";
+@source "../stories/**/*.{ts,tsx}";
+@source "../hooks/**/*.ts";
+@source "../lib/**/*.tsx";
+
 @layer base {
   * {
     border-color: var(--border);

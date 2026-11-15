@@ -43,6 +43,7 @@
     "@storybook/addon-docs": "^10.6.7",
     "@storybook/nextjs-vite": "^10.6.7",
     "@tailwindcss/turbopack": "4.3.3",
+    "@tailwindcss/vite": "^4.3.5",
     "@tanstack/react-devtools": "^0.10.14",
     "@tanstack/react-query-devtools": "^5.107.1",
     "@types/node": "^20",
