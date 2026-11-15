@@ -1,0 +1,71 @@
+"use client";
+
+import { BadgeCheck, Check, ChefHat, PackageCheck, ShoppingBag, Truck } from "lucide-react";
+
+import {
+  Stepper,
+  StepperIndicator,
+  StepperItem,
+  StepperList,
+  StepperSeparator,
+  StepperTitle,
+  StepperTrigger,
+} from "@/components/ui/stepper";
+import type { Fulfilment, OrderStatus } from "@/lib/types";
+
+const pickupSteps = [
+  { value: "placed", title: "Placed", icon: ShoppingBag },
+  { value: "confirmed", title: "Confirmed", icon: BadgeCheck },
+  { value: "ready_for_pickup", title: "Ready for pickup", icon: ChefHat },
+  { value: "completed", title: "Picked up", icon: PackageCheck },
+] as const;
+
+const deliverySteps = [
+  { value: "placed", title: "Placed", icon: ShoppingBag },
+  { value: "confirmed", title: "Confirmed", icon: BadgeCheck },
+  { value: "out_for_delivery", title: "Out for delivery", icon: Truck },
+  { value: "completed", title: "Delivered", icon: PackageCheck },
+] as const;
+
+/**
+ * Read-only progress of an order through its fulfilment pipeline.
+ * Steps vary by fulfilment; cancelled orders keep the stepper dimmed.
+ */
+export function FulfilmentStepper({
+  status,
+  fulfilment,
+}: {
+  status: OrderStatus;
+  fulfilment: Fulfilment;
+}) {
+  const steps = fulfilment === "pickup" ? pickupSteps : deliverySteps;
+  // Cancelled orders stay at whatever step they reached; we just dim the whole thing.
+  const currentValue = steps.some((s) => s.value === status) ? status : "placed";
+
+  return (
+    <Stepper
+      value={currentValue}
+      nonInteractive
+      className={status === "cancelled" ? "w-full opacity-50" : "w-full"}
+    >
+      <StepperList>
+        {steps.map((step) => {
+          const Icon = step.icon;
+          return (
+            <StepperItem key={step.value} value={step.value}>
+              <StepperTrigger>
+                <StepperIndicator>
+                  {(state) =>
+                    state === "completed" ? <Check className="size-4" /> : <Icon className="size-4" />
+                  }
+                </StepperIndicator>
+                <StepperTitle>{step.title}</StepperTitle>
+              </StepperTrigger>
+              <StepperSeparator className="mx-3" />
+            </StepperItem>
+          );
+        })}
+      </StepperList>
+    </Stepper>
+  );
+}

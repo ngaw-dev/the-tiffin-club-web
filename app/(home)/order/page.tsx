@@ -17,6 +17,7 @@ import { formatMoney } from "@/lib/format";
 import { todayOrders } from "@/lib/order-store";
 import { CancelOrderDialog } from "@/app/(home)/cancel-order-dialog";
 import type { Order } from "@/lib/types";
+import { FulfilmentStepper } from "@/app/(home)/fulfilment-stepper";
 
 export default function OrderPage() {
   return (
@@ -159,7 +160,13 @@ function OrderCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 pt-4">
-        <dl className="mt-4 space-y-1 text-sm">
+        {cancelled && (
+          <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            This order was cancelled.
+          </div>
+        )}
+        <FulfilmentStepper status={order.status} fulfilment={order.fulfilment} />
+        <dl className="mt-6 space-y-1 text-sm">
           <div className="flex justify-between">
             <dt className="text-muted-foreground">Fulfilment</dt>
             <dd className="capitalize">{order.fulfilment}</dd>
@@ -170,10 +177,6 @@ function OrderCard({
               <dd>{order.suburb}</dd>
             </div>
           ) : null}
-          <div className="flex justify-between gap-3">
-            <dt className="text-muted-foreground">Manage token</dt>
-            <dd className="font-mono text-xs text-wrap">{order.manage_token}</dd>
-          </div>
         </dl>
 
         <Separator className="my-4" />

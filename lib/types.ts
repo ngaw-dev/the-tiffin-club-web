@@ -74,7 +74,11 @@ export interface OrderItem {
   unit_price: number; // cents
 }
 
-export type OrderStatus = "placed" | "cancelled" | string;
+// Literal statuses known from API.md; the API is the source of truth and may
+// return values we don't know about yet, so unknown strings stay assignable.
+export type OrderStatus =
+  | ("placed" | "confirmed" | "ready_for_pickup" | "out_for_delivery" | "completed" | "cancelled")
+  | (string & {});
 
 export interface Order {
   manage_token: string;
