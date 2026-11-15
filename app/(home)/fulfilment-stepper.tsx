@@ -48,11 +48,15 @@ export function FulfilmentStepper({
       nonInteractive
       className={status === "cancelled" ? "w-full opacity-50" : "w-full"}
     >
-      <StepperList>
+      <StepperList className="max-sm:flex-col max-sm:items-start max-sm:gap-1">
         {steps.map((step) => {
           const Icon = step.icon;
           return (
-            <StepperItem key={step.value} value={step.value}>
+            <StepperItem
+              key={step.value}
+              value={step.value}
+              className="max-sm:flex-col max-sm:flex-none"
+            >
               <StepperTrigger>
                 <StepperIndicator>
                   {(state) =>
@@ -65,7 +69,7 @@ export function FulfilmentStepper({
                 </StepperIndicator>
                 <StepperTitle>{step.title}</StepperTitle>
               </StepperTrigger>
-              <StepperSeparator className="mx-3" />
+              <StepperSeparator className="mx-3 max-sm:mx-0 max-sm:mb-1 max-sm:ml-3.5 max-sm:h-4 max-sm:w-px" />
             </StepperItem>
           );
         })}

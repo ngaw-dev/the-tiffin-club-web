@@ -22,7 +22,7 @@ type Story = StoryObj<typeof OrderCard>
 const render =
   (order: Parameters<typeof OrderCard>[0]['order'], withCancel = true) =>
   () => (
-    <div className="max-w-md p-8">
+    <div className="p-2">
       <OrderCard
         order={order}
         cutoffTime={withCancel ? '20:45' : null}

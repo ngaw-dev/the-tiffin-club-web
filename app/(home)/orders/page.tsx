@@ -187,9 +187,6 @@ function OrderClient() {
       <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         {/* Left: order list (hidden on mobile once a detail is open) */}
         <div className={selectedToken ? "hidden md:block" : "block"}>
-          <p className="mb-3 text-sm font-medium text-muted-foreground">
-            {allOrders.length} {allOrders.length === 1 ? "order" : "orders"}
-          </p>
           <ul className="space-y-3">
             {allOrders.map((order) => {
               const done = order.status === "completed" || order.status === "cancelled";
@@ -228,9 +225,13 @@ function OrderClient() {
                           {order.status === "cancelled" ? "CANCELLED" : "COMPLETED"}
                         </Badge>
                       ) : (
-                        <span className="text-xs text-muted-foreground">
-                          {summary.step}/{summary.total} · {summary.label}
-                        </span>
+                        <Badge variant="secondary" className="gap-1.5 capitalize">
+                          <span className="relative flex size-2">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                            <span className="relative inline-flex size-2 rounded-full bg-primary" />
+                          </span>
+                          {summary.label}
+                        </Badge>
                       )}
                       <ChevronRight
                         className={`ml-auto size-4 shrink-0 transition-transform duration-200 ${
