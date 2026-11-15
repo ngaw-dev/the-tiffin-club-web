@@ -6,12 +6,13 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast, Toaster } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronRight, UtensilsCrossed } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getOrder, getSettings, lookupOrder } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { getMyOrders } from "@/lib/account";
@@ -49,6 +50,7 @@ function stepSummary(status: OrderStatus, fulfilment: Fulfilment) {
     label: stepTitles[current] ?? String(current),
     step: (index >= 0 ? index : 0) + 1,
     total: steps.length,
+    pct: ((index >= 0 ? index : 0) / (steps.length - 1)) * 100,
   };
 }
 
@@ -112,9 +114,17 @@ function OrderClient() {
   const loadingAccountOrders = isSignedIn === true && myOrdersQuery.isPending;
   if (!mounted || ordersQuery.isLoading || loadingAccountOrders) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-20 text-center text-sm text-muted-foreground sm:px-6">
-        Loading your orders…
-      </div>
+      <PageShell>
+        <PageHeading count={null} />
+        <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+          <div className="space-y-3">
+            {[0, 1].map((i) => (
+              <Skeleton key={i} className="h-[86px] w-full rounded-lg" />
+            ))}
+          </div>
+          <Skeleton className="h-72 w-full rounded-lg" />
+        </div>
+      </PageShell>
     );
   }
 
@@ -128,34 +138,44 @@ function OrderClient() {
 
   if (!allOrders.length) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-20 text-center sm:px-6">
-        <h1 className="font-display text-2xl font-semibold sm:text-3xl">No order found</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          {isSignedIn
-            ? "You haven't placed any orders yet — today's menu is waiting."
-            : "We couldn't find an order on this device. Use the lookup below with your manage token and contact details."}
-        </p>
-        {isSignedIn !== true && (
-          <LookupSection
-            onFound={(o) => {
-              setLookupOrders((prev) => [o, ...prev]);
-              setSelectedToken(o.manage_token);
-            }}
-          />
-        )}
+      <PageShell>
+        <PageHeading count={0} />
+        <div className="mx-auto max-w-md py-14 text-center">
+          <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-secondary">
+            <UtensilsCrossed className="size-6 text-muted-foreground" />
+          </div>
+          <h2 className="mt-5 font-display text-xl font-semibold">No order found</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {isSignedIn
+              ? "You haven't placed any orders yet — today's menu is waiting."
+              : "We couldn't find an order on this device. Use the lookup below with your manage token and contact details."}
+          </p>
+          <Button asChild className="mt-6 min-h-11">
+            <Link href="/#todays-menu">Browse today&apos;s menu</Link>
+          </Button>
+          {isSignedIn !== true && (
+            <LookupSection
+              onFound={(o) => {
+                setLookupOrders((prev) => [o, ...prev]);
+                setSelectedToken(o.manage_token);
+              }}
+            />
+          )}
+        </div>
         <Toaster richColors position="top-center" />
-      </div>
+      </PageShell>
     );
   }
 
-  const selected =
-    allOrders.find((o) => o.manage_token === selectedToken) ?? allOrders[0];
+  const selected = allOrders.find((o) => o.manage_token === selectedToken) ?? allOrders[0];
 
   return (
-    <div className="mx-auto max-w-5xl px-4 pb-16 pt-10 sm:px-6">
+    <PageShell>
+      <PageHeading count={allOrders.length} />
+
       {placed && (
-        <div className="mb-6 rounded-lg border border-border bg-primary/5 p-5 text-center">
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">Order placed!</h1>
+        <div className="mb-6 rounded-lg border border-primary/25 bg-primary/5 p-5 text-center">
+          <h2 className="font-display text-xl font-semibold sm:text-2xl">Order placed!</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             We&apos;ll see you soon
             {selected.customer?.name ? `, ${selected.customer.name}` : ""}. Pay in person at{" "}
@@ -164,9 +184,12 @@ function OrderClient() {
         </div>
       )}
 
-      <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+      <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         {/* Left: order list (hidden on mobile once a detail is open) */}
         <div className={selectedToken ? "hidden md:block" : "block"}>
+          <p className="mb-3 text-sm font-medium text-muted-foreground">
+            {allOrders.length} {allOrders.length === 1 ? "order" : "orders"}
+          </p>
           <ul className="space-y-3">
             {allOrders.map((order) => {
               const done = order.status === "completed" || order.status === "cancelled";
@@ -178,10 +201,10 @@ function OrderClient() {
                     type="button"
                     aria-current={active ? "true" : undefined}
                     onClick={() => setSelectedToken(order.manage_token)}
-                    className={`w-full rounded-lg border p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-sm ${
+                    className={`group w-full rounded-lg border p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 ${
                       active
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-foreground/25 hover:bg-accent"
+                        ? "border-primary bg-primary/5 shadow-sm"
+                        : "border-border bg-card hover:border-foreground/25 hover:bg-accent/50"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2 text-sm">
@@ -192,9 +215,9 @@ function OrderClient() {
                           month: "short",
                         })}
                       </span>
-                      <span className="ttc-num font-medium">{formatMoney(order.total)}</span>
+                      <span className="ttc-num font-semibold">{formatMoney(order.total)}</span>
                     </div>
-                    <div className="mt-2 flex items-center gap-2">
+                    <div className="mt-2.5 flex items-center gap-2">
                       <Badge variant="secondary" className="capitalize">
                         {order.fulfilment}
                       </Badge>
@@ -209,6 +232,13 @@ function OrderClient() {
                           {summary.step}/{summary.total} · {summary.label}
                         </span>
                       )}
+                      <ChevronRight
+                        className={`ml-auto size-4 shrink-0 transition-transform duration-200 ${
+                          active
+                            ? "text-primary"
+                            : "text-muted-foreground/50 group-hover:translate-x-0.5 group-hover:text-muted-foreground"
+                        }`}
+                      />
                     </div>
                   </button>
                 </li>
@@ -227,7 +257,7 @@ function OrderClient() {
         </div>
 
         {/* Right: selected order details */}
-        <div className={selectedToken ? "block" : "hidden md:block"}>
+        <div className={selectedToken ? "block" : "hidden md:block md:sticky md:top-24"}>
           {/* Mobile back-to-list affordance */}
           <Button
             variant="ghost"
@@ -262,12 +292,33 @@ function OrderClient() {
         />
       )}
 
-      <div className="mt-6">
+      <div className="mt-8">
         <Button asChild variant="link">
           <Link href="/">Back to today&apos;s menu</Link>
         </Button>
       </div>
       <Toaster richColors position="top-center" />
+    </PageShell>
+  );
+}
+
+function PageShell({ children }: { children: React.ReactNode }) {
+  return <div className="mx-auto max-w-5xl px-4 pb-16 pt-10 sm:px-6">{children}</div>;
+}
+
+function PageHeading({ count }: { count: number | null }) {
+  return (
+    <div className="mb-8">
+      <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+        Your orders
+      </h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        {count === null
+          ? "Checking this device for your orders…"
+          : count === 0
+            ? "Nothing here yet."
+            : "Track each tiffin from kitchen to doorstep."}
+      </p>
     </div>
   );
 }
