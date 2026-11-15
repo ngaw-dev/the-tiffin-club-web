@@ -51,9 +51,13 @@ _Avoid_: Cart, basket
 ### Status
 
 **Placed**:
-The state of an Order from the moment it is accepted until it is Cancelled or handed over.
-_Avoid_: Confirmed, pending, processing
+The state of an Order from the moment it is accepted until it is Cancelled or handed over. The API reports this state with the status value "confirmed".
+_Avoid_: Pending, processing (and treat "confirmed" as the wire word for Placed, not a separate state)
 
 **Cancelled**:
 The terminal state of an Order withdrawn by its Guest before the Cutoff.
 _Avoid_: Refunded, void, deleted
+
+**Simulated Time**:
+The ability, outside production, to make the backend treat a chosen instant as "now" for every time-based rule (Ordering Window, Today's Menu, Manage Token expiry).
+_Avoid_: Clock mocking, time travel, fake time
