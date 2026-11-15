@@ -76,9 +76,7 @@ export function OrderCard({
             <div className="flex justify-between gap-3">
               <dt className="shrink-0 text-muted-foreground">Delivery address</dt>
               <dd className="text-right">
-                {[order.customer.address, order.customer.suburb]
-                  .filter(Boolean)
-                  .join(", ")}
+                {[order.customer.address, order.customer.suburb].filter(Boolean).join(", ")}
               </dd>
             </div>
           ) : null}

@@ -67,9 +67,7 @@ export function OrderSummary({
         disabled={submitting}
         className="mt-5 min-h-11 w-full rounded-lg font-semibold"
       >
-        {submitting
-          ? "Placing order…"
-          : `Place ${fulfilment} order · ${formatMoney(total)}`}
+        {submitting ? "Placing order…" : `Place ${fulfilment} order · ${formatMoney(total)}`}
       </Button>
       <p className="mt-3 text-xs text-muted-foreground">
         Need to change something?{" "}

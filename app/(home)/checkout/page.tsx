@@ -171,10 +171,10 @@ export default function CheckoutPage() {
           fulfilment={fulfilment}
           address={
             fulfilment === "pickup"
-              ? settings?.pickup_address ?? null
+              ? (settings?.pickup_address ?? null)
               : [form.address, form.suburb].filter(Boolean).join(", ") || null
           }
-          mapUrl={fulfilment === "pickup" ? settings?.pickup_map_url ?? null : null}
+          mapUrl={fulfilment === "pickup" ? (settings?.pickup_map_url ?? null) : null}
           submitting={submitting}
         />
       </form>
