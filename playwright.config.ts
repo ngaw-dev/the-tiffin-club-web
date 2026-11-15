@@ -7,7 +7,10 @@ export default defineConfig({
   testDir: "./e2e",
   timeout: 30_000,
   expect: { timeout: 5_000 },
-  fullyParallel: true,
+  // Serialized: parallel workers hammer /menu/today + /settings and trip the
+  // backend's rate limiter (429s).
+  fullyParallel: false,
+  workers: 1,
   reporter: [["list"]],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3100",
