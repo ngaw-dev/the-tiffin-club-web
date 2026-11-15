@@ -22,11 +22,14 @@ const preview: Preview = {
     layout: "fullscreen",
     viewport: {
       viewports: {
-        mobile: { name: "Mobile", styles: { width: "390px", height: "844px" } },
-        tablet: { name: "Tablet", styles: { width: "820px", height: "1180px" } },
-        desktop: { name: "Desktop", styles: { width: "1280px", height: "900px" } },
+        xs: { name: "XS (375×667, < sm)", styles: { width: "375px", height: "667px" } },
+        sm: { name: "SM (640×900, ≥ sm)", styles: { width: "640px", height: "900px" } },
+        md: { name: "MD (768×1024, ≥ md)", styles: { width: "768px", height: "1024px" } },
+        lg: { name: "LG (1024×1100, ≥ lg)", styles: { width: "1024px", height: "1100px" } },
+        xl: { name: "XL (1280×900, ≥ xl)", styles: { width: "1280px", height: "900px" } },
+        "2xl": { name: "2XL (1536×1000, ≥ 2xl)", styles: { width: "1536px", height: "1000px" } },
       },
-      defaultViewport: "desktop",
+      defaultViewport: "responsive",
     },
     controls: {
       matchers: {
