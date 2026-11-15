@@ -45,7 +45,9 @@ const preview: Preview = {
   decorators: [
     (Story, context) => (
       <ForcedThemeProvider theme={(context.globals.theme as Theme) ?? "light"}>
-        <Story />
+        <div className="p-8">
+          <Story />
+        </div>
       </ForcedThemeProvider>
     ),
   ],
