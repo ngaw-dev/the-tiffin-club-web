@@ -39,6 +39,9 @@
     "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
+    "@storybook/addon-a11y": "^10.6.7",
+    "@storybook/addon-docs": "^10.6.7",
+    "@storybook/nextjs-vite": "^10.6.7",
     "@tailwindcss/turbopack": "4.3.3",
     "@tanstack/react-devtools": "^0.10.14",
     "@tanstack/react-query-devtools": "^5.107.1",
@@ -48,19 +51,9 @@
     "oxfmt": "^0.78.0",
     "oxlint": "^1.93.0",
     "oxlint-tsgolint": "^7.0.2007",
+    "storybook": "^10.6.7",
     "tailwindcss": "4.3.3",
     "typescript": "^5",
-    "storybook": "^10.6.7",
-    "@storybook/nextjs-vite": "^10.6.7",
-    "@chromatic-com/storybook": "latest",
-    "@storybook/addon-vitest": "^10.6.7",
-    "@storybook/addon-a11y": "^10.6.7",
-    "@storybook/addon-docs": "^10.6.7",
-    "@storybook/addon-mcp": "^10.6.7",
-    "vite": "latest",
-    "vitest": "^4",
-    "@vitest/browser-playwright": "^4",
-    "@vitest/coverage-v8": "^4",
-    "playwright": "latest"
+    "vite": "^7.1.9"
   }
 }
