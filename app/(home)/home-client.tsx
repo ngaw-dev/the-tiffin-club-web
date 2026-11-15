@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { formatMoney, formatTime } from "@/lib/format";
@@ -21,7 +22,7 @@ const MENU_IMG =
   "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=1200&q=70";
 
 export function HomeClient() {
-  const { lines, total, setQuantity } = useCart();
+  const { lines, total, setQuantity, addItem } = useCart();
 
   const menuQuery = useQuery({
     queryKey: ["menu", "today"],
@@ -46,6 +47,12 @@ export function HomeClient() {
     (item, i) => ({ ...item, id: i + 1 }), // positional ids per order API
   );
   const [mainItem, ...extras] = dishes;
+
+  // The main meal is the default — pre-seed one into the cart once today's
+  // menu loads (no-op if it's already there or the user changed the quantity).
+  useEffect(() => {
+    if (mainItem) addItem(mainItem, 1);
+  }, [mainItem, addItem]);
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6">
