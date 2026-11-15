@@ -2,21 +2,31 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import * as React from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-const meta: Meta<typeof Select> = {
+interface SelectStoryArgs {
+  disabled: boolean
+  placeholder: string
+}
+
+const meta: Meta<SelectStoryArgs> = {
   title: 'UI/Select',
-  component: Select,
+  component: SelectTrigger,
+  argTypes: {
+    disabled: { control: 'boolean' },
+    placeholder: { control: 'text' },
+  },
 }
 
 export default meta
-type Story = StoryObj<typeof Select>
+type Story = StoryObj<SelectStoryArgs>
 
 const meals = ['Breakfast', 'Lunch', 'Dinner', 'Snack']
 
 export const Default: Story = {
-  render: () => (
+  args: { disabled: false, placeholder: 'Choose a meal' },
+  render: ({ disabled, placeholder }) => (
     <Select defaultValue="Lunch">
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Choose a meal" />
+      <SelectTrigger className="w-[180px]" disabled={disabled}>
+        <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
         {meals.map((meal) => (

@@ -10,27 +10,38 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+interface DialogStoryArgs {
+  title: string
+  description: string
+}
 
-const meta: Meta<typeof Dialog> = {
+const meta: Meta<DialogStoryArgs> = {
   title: 'UI/Dialog',
-  component: Dialog,
+  component: DialogTrigger,
+  argTypes: {
+    title: { control: 'text' },
+    description: { control: 'text' },
+  },
 }
 
 export default meta
-type Story = StoryObj<typeof Dialog>
+type Story = StoryObj<DialogStoryArgs>
 
 export const Default: Story = {
-  render: () => (
+  args: {
+    title: 'Cancel subscription?',
+    description:
+      'Your remaining tiffins this week will still be delivered. You can resubscribe anytime.',
+  },
+  render: ({ title, description }) => (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Cancel subscription</Button>
+        <Button variant="outline">Open dialog</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Cancel subscription?</DialogTitle>
-          <DialogDescription>
-            Your remaining tiffins this week will still be delivered. You can resubscribe anytime.
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>

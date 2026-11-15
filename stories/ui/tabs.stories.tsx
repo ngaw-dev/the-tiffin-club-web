@@ -4,14 +4,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 const meta: Meta<typeof Tabs> = {
   title: 'UI/Tabs',
   component: Tabs,
+  argTypes: {
+    orientation: {
+      control: 'radio',
+      options: ['horizontal', 'vertical'],
+    },
+  },
 }
 
 export default meta
 type Story = StoryObj<typeof Tabs>
 
 export const Default: Story = {
-  render: () => (
-    <Tabs defaultValue="weekly" className="max-w-md">
+  render: ({ orientation }) => (
+    <Tabs defaultValue="weekly" orientation={orientation} className="max-w-md">
       <TabsList>
         <TabsTrigger value="weekly">Weekly</TabsTrigger>
         <TabsTrigger value="monthly">Monthly</TabsTrigger>

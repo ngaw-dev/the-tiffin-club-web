@@ -4,7 +4,9 @@ import { ThemeProvider } from 'next-themes'
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 
-const ThemeDecorator = ({ children, theme }: { children: ReactNode; theme: string }) => {
+type Theme = 'light' | 'dark'
+
+const ForcedThemeProvider = ({ children, theme }: { children: ReactNode; theme: Theme }) => {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
     document.documentElement.style.colorScheme = theme
@@ -24,7 +26,7 @@ const preview: Preview = {
       disable: true,
     },
     a11y: {
-      test: 'todo',
+      test: 'error',
     },
   },
   globalTypes: {
@@ -43,9 +45,9 @@ const preview: Preview = {
   },
   decorators: [
     (Story, context) => (
-      <ThemeDecorator theme={context.globals.theme as string}>
+      <ForcedThemeProvider theme={(context.globals.theme as Theme) ?? 'light'}>
         <Story />
-      </ThemeDecorator>
+      </ForcedThemeProvider>
     ),
   ],
 }

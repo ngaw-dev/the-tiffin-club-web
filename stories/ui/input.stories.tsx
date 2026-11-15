@@ -5,6 +5,15 @@ import { Label } from '@/components/ui/label'
 const meta: Meta<typeof Input> = {
   title: 'UI/Input',
   component: Input,
+  argTypes: {
+    type: {
+      control: 'select',
+      options: ['text', 'email', 'password', 'number', 'search', 'tel', 'url'],
+    },
+    placeholder: { control: 'text' },
+    disabled: { control: 'boolean' },
+    required: { control: 'boolean' },
+  },
 }
 
 export default meta

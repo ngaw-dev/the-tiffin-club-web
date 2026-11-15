@@ -4,6 +4,9 @@ import { Label } from '@/components/ui/label'
 const meta: Meta<typeof Label> = {
   title: 'UI/Label',
   component: Label,
+  argTypes: {
+    children: { control: 'text' },
+  },
 }
 
 export default meta
