@@ -31,6 +31,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (!existing) {
         return next > 0 ? [...prev, { item, quantity: next }] : prev;
       }
+      // Bail when nothing changes — returning a new array here would loop
+      // any effect that depends on cart state or on re-derived item objects.
+      if (existing.quantity === next) return prev;
       return next === 0
         ? prev.filter((l) => l.item.id !== item.id)
         : prev.map((l) => (l.item.id === item.id ? { ...l, quantity: next } : l));
@@ -41,8 +44,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setLines((prev) => {
       const existing = prev.find((l) => l.item.id === item.id);
       if (existing) {
+        // No-op when the quantity wouldn't change (capped at 20).
+        const target = Math.min(20, existing.quantity + quantity);
+        if (target === existing.quantity) return prev;
         return prev.map((l) =>
-          l.item.id === item.id ? { ...l, quantity: Math.min(20, l.quantity + quantity) } : l,
+          l.item.id === item.id ? { ...l, quantity: target } : l,
         );
       }
       return [...prev, { item, quantity: Math.min(20, Math.max(1, quantity)) }];

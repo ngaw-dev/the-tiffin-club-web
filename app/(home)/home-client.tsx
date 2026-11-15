@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { formatMoney, formatTime } from "@/lib/format";
@@ -43,8 +43,16 @@ export function HomeClient() {
       ? `${formatTime(ordering.opens_at)}-${formatTime(ordering.closes_at)}`
       : null;
 
-  const dishes: MenuItem[] = (menu?.main ? [menu.main, ...menu.extras] : (menu?.extras ?? [])).map(
-    (item, i) => ({ ...item, id: i + 1 }), // positional ids per order API
+  // Memoized so `mainItem` keeps a stable identity across renders — the
+  // pre-seed effect below depends on it and would re-fire every render
+  // if the array/object were rebuilt each time (addItem is a no-op then,
+  // but React still warns on unstable effect deps).
+  const dishes: MenuItem[] = useMemo(
+    () =>
+      (menu?.main ? [menu.main, ...menu.extras] : (menu?.extras ?? [])).map(
+        (item, i) => ({ ...item, id: i + 1 }), // positional ids per order API
+      ),
+    [menu],
   );
   const [mainItem, ...extras] = dishes;
 

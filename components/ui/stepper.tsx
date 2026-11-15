@@ -745,6 +745,35 @@ function StepperTrigger(props: ButtonProps) {
     };
   }, []);
 
+  // Registration must not depend on `focusContext`: onItemRegister/
+  // onFocusableItemAdd change the focus context value, which would re-run
+  // this effect (add → context change → cleanup remove → add …) forever.
+  // Mutable fields are read from refs so the registration stays fresh.
+  const isTabStopRef = useValueAsRef(isTabStop);
+  const isDisabledRef = useValueAsRef(isDisabled);
+
+  useLayoutEffect(() => {
+    focusContext.onItemRegister({
+      id: triggerId,
+      ref: triggerRef,
+      value: itemValue,
+      active: isTabStopRef.current,
+      disabled: isDisabledRef.current,
+    });
+
+    if (!isDisabledRef.current) {
+      focusContext.onFocusableItemAdd();
+    }
+
+    return () => {
+      focusContext.onItemUnregister(triggerId);
+      if (!isDisabledRef.current) {
+        focusContext.onFocusableItemRemove();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only by design
+  }, [triggerId, itemValue]);
+
   useLayoutEffect(() => {
     focusContext.onItemRegister({
       id: triggerId,
@@ -753,17 +782,6 @@ function StepperTrigger(props: ButtonProps) {
       active: isTabStop,
       disabled: isDisabled,
     });
-
-    if (!isDisabled) {
-      focusContext.onFocusableItemAdd();
-    }
-
-    return () => {
-      focusContext.onItemUnregister(triggerId);
-      if (!isDisabled) {
-        focusContext.onFocusableItemRemove();
-      }
-    };
   }, [focusContext, triggerId, itemValue, isTabStop, isDisabled]);
 
   const onClick = React.useCallback(
