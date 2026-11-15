@@ -1,33 +1,33 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite'
-import { AccordionIndicator } from '@/components/shadcnblocks/accordion-indicator'
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { AccordionIndicator } from "@/components/shadcnblocks/accordion-indicator";
 
 const meta: Meta<typeof AccordionIndicator> = {
-  title: 'Blocks/Accordion Indicator',
+  title: "Blocks/Accordion Indicator",
   component: AccordionIndicator,
-}
+};
 
-export default meta
-type Story = StoryObj<typeof AccordionIndicator>
+export default meta;
+type Story = StoryObj<typeof AccordionIndicator>;
 
 /**
  * The indicator reads open state from an ancestor aria-expanded, so each
  * state is rendered inside a plain trigger with that attribute set.
  */
 function IndicatorRow({
-  'aria-expanded': expanded,
+  "aria-expanded": expanded,
   variant,
   shape,
 }: {
-  'aria-expanded': boolean
-  variant?: 'plus' | 'chevron' | 'chevron-right'
-  shape?: 'none' | 'square' | 'circle'
+  "aria-expanded": boolean;
+  variant?: "plus" | "chevron" | "chevron-right";
+  shape?: "none" | "square" | "circle";
 }) {
   return (
     <span aria-expanded={expanded} className="flex items-center gap-2 text-sm">
-      {expanded ? 'Expanded' : 'Collapsed'}
+      {expanded ? "Expanded" : "Collapsed"}
       <AccordionIndicator variant={variant} shape={shape} />
     </span>
-  )
+  );
 }
 
 export const Plus: Story = {
@@ -37,7 +37,7 @@ export const Plus: Story = {
       <IndicatorRow aria-expanded />
     </div>
   ),
-}
+};
 
 export const PlusSquare: Story = {
   render: () => (
@@ -46,7 +46,7 @@ export const PlusSquare: Story = {
       <IndicatorRow aria-expanded variant="plus" shape="square" />
     </div>
   ),
-}
+};
 
 export const Chevron: Story = {
   render: () => (
@@ -55,7 +55,7 @@ export const Chevron: Story = {
       <IndicatorRow aria-expanded variant="chevron" />
     </div>
   ),
-}
+};
 
 export const ChevronRightCircle: Story = {
   render: () => (
@@ -64,4 +64,4 @@ export const ChevronRightCircle: Story = {
       <IndicatorRow aria-expanded variant="chevron-right" shape="circle" />
     </div>
   ),
-}
+};
