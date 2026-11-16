@@ -12,6 +12,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
         defaultOptions: {
           queries: {
             staleTime: 60 * 1000,
+            // Don't retry 429s — each retry feeds the backend rate limiter
+            // and turns one failed request into four. (ApiError carries
+            // .status; lib/api.ts normalizes axios errors to it.)
+            retry: (failureCount, error) => {
+              const status = (error as { status?: number })?.status;
+              if (status === 429) return false;
+              return failureCount < 3;
+            },
           },
         },
       }),

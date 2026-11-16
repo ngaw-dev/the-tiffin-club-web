@@ -5,8 +5,11 @@ import type { TestInfo } from "@playwright/test";
 // Non-production backends only.
 export type SimTimeFixture = (isoInstant: string) => Promise<void>;
 
-// shortcut: fixed instant, assumes a published menu for that date on the backend
-const DEFAULT_SIMULATED_TIME = "2026-11-16T21:00:00+13:00"; // mid Ordering Window (09:00–23:00 NZ)
+// shortcut: fixed date, assumes a published menu for that date on the backend.
+// Seconds jitter per process: the backend rate limiter keys by simulated
+// instant, so a fresh bucket every run; 21:00 stays mid Ordering Window.
+const RUN_JITTER = String(Date.now() % 60).padStart(2, "0");
+export const DEFAULT_SIMULATED_TIME = `2026-11-16T21:00:${RUN_JITTER}+13:00`;
 
 /** Intercept /api/v1/** from the browser and stamp X-Simulated-Time. */
 export async function injectSimulatedTime(
