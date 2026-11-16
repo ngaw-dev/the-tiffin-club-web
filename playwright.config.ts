@@ -1,5 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// Playwright only auto-loads .env, but the backend URL lives in .env.local —
+// load it so Node-side test code (page.request, helpers) sees the same
+// NEXT_PUBLIC_API_BASE_URL the app itself uses.
+import { config as loadEnv } from "dotenv";
+
+loadEnv({ path: ".env.local", quiet: true });
+
 // Local-first e2e setup (see .scratch/playwright-e2e/issues/):
 // Chromium only; the Next dev server is started via webServer and hits the
 // same backend as local dev through NEXT_PUBLIC_API_BASE_URL.
@@ -14,6 +21,8 @@ export default defineConfig({
   reporter: [["list"]],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3100",
+    // Local ddev backend uses a self-signed cert.
+    ignoreHTTPSErrors: true,
     trace: "retain-on-failure",
   },
   projects: [
