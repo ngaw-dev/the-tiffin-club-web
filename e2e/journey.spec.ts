@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { capturePageErrors } from "./helpers/page-errors";
+import { fakeGuest, seedFaker } from "./helpers/fake-guest";
 import { injectSimulatedTime } from "./helpers/simulated-time";
 
 // Ticket 04: the core guest journey at a pinned simulated instant mid
@@ -7,6 +8,7 @@ import { injectSimulatedTime } from "./helpers/simulated-time";
 // status `confirmed`) visible on /orders via its Manage Token.
 test("guest orders today's meal and sees it Placed on /orders", async ({ page }) => {
   const problems = capturePageErrors(page);
+  seedFaker(test.info().title);
   await injectSimulatedTime(page);
 
   // Today's Menu renders with the Ordering Window open
@@ -25,8 +27,9 @@ test("guest orders today's meal and sees it Placed on /orders", async ({ page })
   await expect(page).toHaveURL(/\/checkout/);
 
   // Fill guest details (pickup needs just a name + contact)
-  await page.getByLabel("Name").fill("E2E Journey");
-  await page.getByLabel(/Email/).fill("e2e-journey@thetiffinclub.co.nz");
+  const guest = fakeGuest();
+  await page.getByLabel("Name").fill(guest.name);
+  await page.getByLabel(/Email/).fill(guest.email);
 
   await page.getByRole("button", { name: /Place pickup order/i }).click();
 

@@ -4,6 +4,7 @@ import {
   DEFAULT_SIMULATED_TIME as SIMULATED_TIME,
   injectSimulatedTime,
 } from "./helpers/simulated-time";
+import { fakeAddress, fakeGuest, seedFaker } from "./helpers/fake-guest";
 
 // Cached settings fetched once per worker via Playwright's request context:
 // one request, keeps the backend's rate limiter quiet, and X-Simulated-Time
@@ -30,6 +31,7 @@ async function getSettings(page: Page) {
 for (const fulfilment of ["pickup", "delivery"] as const) {
   test(`guest ${fulfilment} order renders correctly on /orders`, async ({ page }) => {
     const problems = capturePageErrors(page);
+    seedFaker(test.info().title);
     await injectSimulatedTime(page);
     const settings = await getSettings(page);
 
@@ -46,15 +48,15 @@ for (const fulfilment of ["pickup", "delivery"] as const) {
     await expect(page).toHaveURL(/\/checkout/);
 
     // Guest details; delivery adds required address + suburb
-    await page.getByLabel("Name").fill(`E2E ${fulfilment}`);
-    const email = `e2e-${fulfilment}@thetiffinclub.co.nz`;
-    await page.getByLabel(/Email/).fill(email);
+    const guest = fakeGuest();
+    await page.getByLabel("Name").fill(guest.name);
+    await page.getByLabel(/Email/).fill(guest.email);
 
     if (fulfilment === "delivery") {
       await page.getByRole("button", { name: "Delivery" }).click();
       // Address/suburb fields appear only for delivery
       await expect(page.getByLabel("Delivery address")).toBeVisible();
-      await page.getByLabel("Delivery address").fill("1 E2E Street");
+      await page.getByLabel("Delivery address").fill(fakeAddress());
 
       const suburb = settings.delivery_suburbs[0];
       await page.getByRole("combobox", { name: "Suburb" }).click();

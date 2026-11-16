@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { capturePageErrors } from "./helpers/page-errors";
 import { injectSimulatedTime } from "./helpers/simulated-time";
+import { fakeGuest, seedFaker } from "./helpers/fake-guest";
 
 // Orders page (/orders) guest surface, complementing journey.spec (full
 // happy path) and fulfilment.spec (pickup/delivery detail): empty state,
@@ -9,6 +10,7 @@ import { injectSimulatedTime } from "./helpers/simulated-time";
 
 /** Place a minimal pickup order and return its manage token + email used. */
 async function placePickupOrder(page: Page): Promise<{ token: string; email: string }> {
+  seedFaker(test.info().title);
   await page.goto("/");
   await expect(page.getByRole("region", { name: "Today's Menu" })).toBeVisible();
   const main = page.getByRole("region", { name: "Today's Menu" }).getByRole("heading", { level: 3 }).first();
@@ -17,13 +19,13 @@ async function placePickupOrder(page: Page): Promise<{ token: string; email: str
   await page.getByRole("link", { name: /Checkout/ }).click();
   await expect(page).toHaveURL(/\/checkout/);
 
-  const email = `e2e-orders-page-${Date.now()}@thetiffinclub.co.nz`;
-  await page.getByLabel("Name").fill("E2E Orders Page");
-  await page.getByLabel(/Email/).fill(email);
+  const guest = fakeGuest();
+  await page.getByLabel("Name").fill(guest.name);
+  await page.getByLabel(/Email/).fill(guest.email);
   await page.getByRole("button", { name: /Place pickup order/i }).click();
 
   await expect(page).toHaveURL(/\/orders\?token=[0-9a-f]{64}&placed=1/, { timeout: 15_000 });
-  return { token: new URL(page.url()).searchParams.get("token")!, email };
+  return { token: new URL(page.url()).searchParams.get("token")!, email: guest.email };
 }
 
 test("fresh visitor sees the empty state with lookup entry point", async ({ page }) => {
@@ -153,7 +155,7 @@ test("delivery order shows the delivery address on /orders", async ({ page }) =>
     const body = await response.json();
     if (body?.data) {
       body.data.fulfilment = "delivery";
-      body.data.customer = { name: "E2E Orders Page", email: "e2e@thetiffinclub.co.nz", phone: null, address: DELIVERY_ADDRESS, suburb: "Te Aro" };
+      body.data.customer = { ...fakeGuest(), phone: null, address: DELIVERY_ADDRESS, suburb: "Te Aro" };
     }
     return route.fulfill({ response, json: body });
   });
