@@ -18,7 +18,17 @@ export function FooterContact() {
       <div className="text-sm">
         <p className="font-medium">Hours</p>
         <ul className="mt-2 space-y-1 text-muted-foreground">
-          {contact.pickupWindow && <li>Pickup: {contact.pickupWindow}</li>}
+          <li>Pickup: {contact.pickupWindow}</li>
+          <li>Last order: {contact.orderCutoffTime}</li>
+          <li>
+            <a
+              href={contact.pickupMapUrl}
+              className="mt-2 inline-block rounded-lg underline-offset-4 hover:underline"
+              target="_blank"
+            >
+              {contact.pickupAddress}
+            </a>{" "}
+          </li>
         </ul>
       </div>
       <div className="text-sm">
@@ -44,7 +54,7 @@ export function FooterContact() {
         )}
         <p className="mt-2 text-muted-foreground">
           Have an order?{" "}
-          <Link href="/home" className="underline underline-offset-4 hover:text-foreground">
+          <Link href="/orders" className="underline underline-offset-4 hover:text-foreground">
             Find my order
           </Link>
         </p>

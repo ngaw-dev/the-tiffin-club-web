@@ -12,6 +12,9 @@ export interface ContactInfo {
   altPhone: string | null;
   altPhoneHref: string | null;
   pickupWindow: string | null;
+  pickupAddress: string | null;
+  pickupMapUrl: string | null;
+  orderCutoffTime: string | null;
 }
 
 function telHref(number: string): string {
@@ -38,6 +41,9 @@ export function contactFromSettings(s: StoreSettings | null): ContactInfo {
       s?.pickup_start_time && s?.pickup_end_time
         ? `${time12h(s.pickup_start_time)}-${time12h(s.pickup_end_time)}`
         : null,
+    pickupAddress: s?.pickup_address ?? null,
+    pickupMapUrl: s?.pickup_map_url ?? null,
+    orderCutoffTime: time12h(s?.order_cutoff_time ?? null),
   };
 }
 

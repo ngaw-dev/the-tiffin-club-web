@@ -12,6 +12,7 @@ import { FulfilmentStepper } from "@/app/(home)/fulfilment-stepper";
 export function OrderCard({
   order,
   cutoffTime = null,
+  storePhone = null,
   pickupAddress = null,
   pickupMapUrl = null,
   onCancel,
@@ -19,16 +20,18 @@ export function OrderCard({
 }: {
   order: Order;
   cutoffTime?: string | null;
+  storePhone?: string | null;
   pickupAddress?: string | null;
   pickupMapUrl?: string | null;
   onCancel?: () => void;
   className?: string;
 }) {
   const cancelled = order.status === "cancelled";
+  const cancellable = order.status !== "cancelled" && order.status !== "completed";
   // Orders past expiry (23:59:59 order day) can no longer be managed.
   // Expiry is checked at click time (Date.now() is impure during render).
-  // The button is hidden for cancelled orders only; expired orders surface
-  // a "too late" toast if clicked after the deadline.
+  // The button is hidden for cancelled/completed orders only; expired orders
+  // surface a "too late" toast if clicked after the deadline.
 
   return (
     <Card className={`rounded-lg ${className}`}>
@@ -99,7 +102,7 @@ export function OrderCard({
           <span className="ttc-num">{formatMoney(order.total)}</span>
         </div>
 
-        {!cancelled && onCancel && (
+        {cancellable && onCancel && (
           <Button
             variant="link"
             onClick={() => {
@@ -111,6 +114,14 @@ export function OrderCard({
             Cancel order
             {cutoffTime ? ` (until ${cutoffTime})` : ""}
           </Button>
+        )}
+        {!cancellable && !cancelled && storePhone && (
+          <a
+            href={`tel:${storePhone.replace(/\s+/g, "")}`}
+            className="mt-5 inline-block text-sm font-normal text-muted-foreground underline underline-offset-4 hover:text-primary"
+          >
+            Need to change this order? Contact us ({storePhone})
+          </a>
         )}
       </CardContent>
     </Card>
