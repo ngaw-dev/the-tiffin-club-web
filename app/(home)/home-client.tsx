@@ -57,27 +57,27 @@ export function HomeClient() {
       <div className="shell">
         {/* Counter hero: the text block and the live menu card share the first
             screen — the card is the hero visual, not a photograph. */}
-      <div className="grid gap-[var(--space-2xl)] py-[var(--space-xl)] lg:grid-cols-[5fr_7fr] lg:items-start lg:py-[var(--space-2xl)]">
-        <Hero windowLabel={windowLabel} />
+        <div className="grid gap-[var(--space-2xl)] py-[var(--space-xl)] lg:grid-cols-[5fr_7fr] lg:items-start lg:py-[var(--space-2xl)]">
+          <Hero windowLabel={windowLabel} />
 
-        <TodayMenuSection
-          loading={menuQuery.isPending}
-          loadError={menuQuery.isError}
-          menuPublished={!!menu && menu.status !== "coming_soon"}
-          ordering={ordering}
-          windowLabel={windowLabel}
-          mainItem={mainItem ?? null}
-          extras={extras}
-          lines={lines}
-          total={total}
-          orderable={orderable}
-          contact={{ phone: contact.phone, phoneHref: contact.phoneHref }}
-          onQuantityChange={setQuantity}
-        />
-      </div>
+          <TodayMenuSection
+            loading={menuQuery.isPending}
+            loadError={menuQuery.isError}
+            menuPublished={!!menu && menu.status !== "coming_soon"}
+            ordering={ordering}
+            windowLabel={windowLabel}
+            mainItem={mainItem ?? null}
+            extras={extras}
+            lines={lines}
+            total={total}
+            orderable={orderable}
+            contact={{ phone: contact.phone, phoneHref: contact.phoneHref }}
+            onQuantityChange={setQuantity}
+          />
+        </div>
 
-      {/* How it works */}
-      <HowItWorks windowLabel={windowLabel} contact={contact} />
+        {/* How it works */}
+        <HowItWorks windowLabel={windowLabel} contact={contact} />
 
         {/* FAQ */}
         <Faq windowLabel={windowLabel} />

@@ -34,7 +34,6 @@ export default function OrderPage() {
   );
 }
 
-
 function OrderClient() {
   const params = useSearchParams();
   const urlToken = params.get("token");

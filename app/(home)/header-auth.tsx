@@ -11,7 +11,11 @@ export function HeaderAuth() {
       {/* Hidden on the smallest screens: the header row can't fit logo +
           orders + sign-in + CTA at 375px, and /orders stays reachable from
           the footer's "Find my order" link. */}
-      <Button asChild variant="link" className="hidden min-h-11 px-3 py-2 text-sm font-medium sm:inline-flex">
+      <Button
+        asChild
+        variant="link"
+        className="hidden min-h-11 px-3 py-2 text-sm font-medium sm:inline-flex"
+      >
         <Link href="/orders">My orders</Link>
       </Button>
       <Show when="signed-in">

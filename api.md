@@ -18,15 +18,15 @@ Every response uses the same envelope:
 
 ### Status codes
 
-| Code | Meaning |
-|------|---------|
-| 200 | OK |
-| 201 | Created (order placed, account registered) |
-| 401 | Missing/invalid bearer token |
-| 404 | Not found (also used for every order-lookup failure, so nothing leaks) |
-| 410 | Order manage token expired (past 23:59:59 on the order day) |
-| 422 | Validation failed — `errors` maps field → messages |
-| 429 | Rate limited (account register/login: 10/min) |
+| Code | Meaning                                                                |
+| ---- | ---------------------------------------------------------------------- |
+| 200  | OK                                                                     |
+| 201  | Created (order placed, account registered)                             |
+| 401  | Missing/invalid bearer token                                           |
+| 404  | Not found (also used for every order-lookup failure, so nothing leaks) |
+| 410  | Order manage token expired (past 23:59:59 on the order day)            |
+| 422  | Validation failed — `errors` maps field → messages                     |
+| 429  | Rate limited (account register/login: 10/min)                          |
 
 ### Money & times
 
@@ -123,9 +123,7 @@ Returned by every order endpoint (place, lookup, show, update, cancel):
     "suburb": "Te Aro"
   },
   "delivery_notes": "Knock twice",
-  "items": [
-    { "name": "Butter Chicken", "quantity": 2, "unit_price": 1600, "line_total": 3200 }
-  ],
+  "items": [{ "name": "Butter Chicken", "quantity": 2, "unit_price": 1600, "line_total": 3200 }],
   "total": 3600,
   "payment": "pay_in_person",
   "placed_at": "2026-11-15T10:00:00+13:00",
@@ -133,14 +131,14 @@ Returned by every order endpoint (place, lookup, show, update, cancel):
 }
 ```
 
-| Field | Notes |
-|-------|-------|
-| `status` | `placed` \| `confirmed` \| `ready_for_pickup` \| `out_for_delivery` \| `completed` \| `cancelled` — orders are returned as `confirmed` immediately on placement (auto-confirm; manual staff confirmation to come) |
-| `fulfilment` | `pickup` \| `delivery` |
-| `customer` | Live customer details at read time (not a placement snapshot) — absent if the relation isn't eager-loaded |
-| `delivery_notes` | Free-text notes for the driver (e.g. access instructions) |
-| `total` | Server-computed at menu prices, cents |
-| `expires_at` | The manage token's lifetime ends here — 23:59:59 on the order day |
+| Field            | Notes                                                                                                                                                                                                             |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `status`         | `placed` \| `confirmed` \| `ready_for_pickup` \| `out_for_delivery` \| `completed` \| `cancelled` — orders are returned as `confirmed` immediately on placement (auto-confirm; manual staff confirmation to come) |
+| `fulfilment`     | `pickup` \| `delivery`                                                                                                                                                                                            |
+| `customer`       | Live customer details at read time (not a placement snapshot) — absent if the relation isn't eager-loaded                                                                                                         |
+| `delivery_notes` | Free-text notes for the driver (e.g. access instructions)                                                                                                                                                         |
+| `total`          | Server-computed at menu prices, cents                                                                                                                                                                             |
+| `expires_at`     | The manage token's lifetime ends here — 23:59:59 on the order day                                                                                                                                                 |
 
 ### `POST /orders`
 
@@ -157,7 +155,10 @@ Place a guest order for today's menu. Returns **201** with the order object — 
   "address": "12 Cuba Street",
   "suburb": "Te Aro",
   "delivery_notes": "Knock twice",
-  "items": [{ "id": 3, "quantity": 2 }, { "id": 4, "quantity": 1 }]
+  "items": [
+    { "id": 3, "quantity": 2 },
+    { "id": 4, "quantity": 1 }
+  ]
 }
 ```
 
@@ -211,7 +212,7 @@ Edit an order before cutoff. All fields `sometimes`; item ids validated against 
 
 Applied fields: `fulfilment`, `delivery_notes`, `items`. Changing `fulfilment` to `delivery` does **not** re-validate a suburb (validate client-side against `GET /settings`). Errors: `422` (validation / off-menu items), **410** (expired), and `422` with `ordering` after cutoff.
 
-> ⚠️ Known gap: the request still *accepts* `name`, `address`, `suburb` (validated then silently ignored — these now live on the customer). Email/phone are already rejected.
+> ⚠️ Known gap: the request still _accepts_ `name`, `address`, `suburb` (validated then silently ignored — these now live on the customer). Email/phone are already rejected.
 
 ### `DELETE /orders/{token}`
 

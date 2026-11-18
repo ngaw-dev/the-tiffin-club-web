@@ -13,7 +13,10 @@ async function placePickupOrder(page: Page): Promise<{ token: string; email: str
   seedFaker(test.info().title);
   await page.goto("/");
   await expect(page.getByRole("region", { name: "Today's Menu" })).toBeVisible();
-  const main = page.getByRole("region", { name: "Today's Menu" }).getByRole("heading", { level: 3 }).first();
+  const main = page
+    .getByRole("region", { name: "Today's Menu" })
+    .getByRole("heading", { level: 3 })
+    .first();
   const mainName = (await main.textContent())!.trim();
   await page.getByRole("button", { name: `Increase Quantity of ${mainName}` }).click();
   await page.getByRole("link", { name: /Checkout/ }).click();
@@ -45,12 +48,16 @@ test("fresh visitor sees the empty state with lookup entry point", async ({ page
   await expect(page.getByRole("link", { name: "Browse today's menu" })).toBeVisible();
 
   // Guest lookup entry point is offered
-  await expect(page.getByRole("button", { name: "Ordered on another device? Find your order" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Ordered on another device? Find your order" }),
+  ).toBeVisible();
 
   expect(problems).toEqual([]);
 });
 
-test("URL token shows the order even with no stored tokens, banner only with placed=1", async ({ page }) => {
+test("URL token shows the order even with no stored tokens, banner only with placed=1", async ({
+  page,
+}) => {
   const problems = capturePageErrors(page);
   await injectSimulatedTime(page);
 
@@ -155,7 +162,12 @@ test("delivery order shows the delivery address on /orders", async ({ page }) =>
     const body = await response.json();
     if (body?.data) {
       body.data.fulfilment = "delivery";
-      body.data.customer = { ...fakeGuest(), phone: null, address: DELIVERY_ADDRESS, suburb: "Te Aro" };
+      body.data.customer = {
+        ...fakeGuest(),
+        phone: null,
+        address: DELIVERY_ADDRESS,
+        suburb: "Te Aro",
+      };
     }
     return route.fulfill({ response, json: body });
   });

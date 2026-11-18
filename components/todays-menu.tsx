@@ -73,9 +73,7 @@ export function TodayMenuSection({
           Today&apos;s menu
         </h2>
         {windowLabel && (
-          <span className="text-sm text-muted-foreground ttc-num">
-            Ordering {windowLabel} NZ
-          </span>
+          <span className="text-sm text-muted-foreground ttc-num">Ordering {windowLabel} NZ</span>
         )}
       </div>
 

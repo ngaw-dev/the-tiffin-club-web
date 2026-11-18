@@ -63,10 +63,7 @@ export function Visit({ windowLabel, contact }: VisitProps) {
             <div>
               <dt className="font-medium">Questions</dt>
               <dd className="mt-[var(--space-2xs)]">
-                <a
-                  href={contact.phoneHref}
-                  className="text-primary underline underline-offset-4"
-                >
+                <a href={contact.phoneHref} className="text-primary underline underline-offset-4">
                   {contact.phone}
                 </a>
               </dd>

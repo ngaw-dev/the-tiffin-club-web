@@ -144,7 +144,10 @@ export default function CheckoutPage() {
         </div>
       )}
 
-      <form onSubmit={submit} className="mt-12 grid items-start gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <form
+        onSubmit={submit}
+        className="mt-12 grid items-start gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_360px]"
+      >
         {/* The flow reads as one ruled column: each section sits under a hairline. */}
         <div className="space-y-12">
           <FulfilmentSelector
