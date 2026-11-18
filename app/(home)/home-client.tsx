@@ -53,9 +53,10 @@ export function HomeClient() {
   }, [mainItem, addItem]);
 
   return (
-    <div className="shell">
-      {/* Counter hero: the text block and the live menu card share the first
-          screen — the card is the hero visual, not a photograph. */}
+    <>
+      <div className="shell">
+        {/* Counter hero: the text block and the live menu card share the first
+            screen — the card is the hero visual, not a photograph. */}
       <div className="grid gap-[var(--space-2xl)] py-[var(--space-xl)] lg:grid-cols-[5fr_7fr] lg:items-start lg:py-[var(--space-2xl)]">
         <Hero windowLabel={windowLabel} />
 
@@ -78,14 +79,15 @@ export function HomeClient() {
       {/* How it works */}
       <HowItWorks windowLabel={windowLabel} contact={contact} />
 
-      {/* FAQ */}
-      <Faq windowLabel={windowLabel} />
+        {/* FAQ */}
+        <Faq windowLabel={windowLabel} />
+      </div>
 
-      {/* Close: the order again, with hours and the address */}
+      {/* Close: the order again, with hours and the address. Outside .shell so
+          its bg-secondary band bleeds edge-to-edge; it carries its own .shell. */}
       <Visit windowLabel={windowLabel} contact={contact} />
 
-
       <Toaster richColors position="top-center" />
-    </div>
+    </>
   );
 }

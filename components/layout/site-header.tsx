@@ -22,7 +22,9 @@ export function SiteHeader() {
             <path d="M12 5.5V4" />
             <circle cx="12" cy="3" r="1" fill="currentColor" stroke="none" />
           </svg>
-          <span className="font-display text-base font-semibold tracking-tight sm:text-lg">
+          {/* nowrap keeps the wordmark on one line at 375px — the wrapped
+              three-line stack looked broken, and the nav has room to spare */}
+          <span className="shrink-0 whitespace-nowrap font-display text-base font-semibold tracking-tight sm:text-lg">
             The Tiffin Club
           </span>
         </Link>

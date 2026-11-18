@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
  */
 export function Hero({ windowLabel }: { windowLabel: string | null }) {
   return (
-    <div>
+    // Sticky on desktop: the menu card is far taller than this block, and the
+    // sticky follow keeps the counter's left side from reading as dead space
+    <div className="lg:sticky lg:top-24">
       <h1 className="text-display-s leading-[1.05]">Today&apos;s meal, ordered simply.</h1>
       <p className="lead mt-[var(--space-lg)] text-muted-foreground">
         {windowLabel

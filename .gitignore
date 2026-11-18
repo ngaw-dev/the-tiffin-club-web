@@ -46,3 +46,6 @@ next-env.d.ts
 storybook-static
 storybook-static/
 test-results
+.hallmark
+desktop-home-full.png
+mobile-home-full.png
