@@ -19,14 +19,14 @@ export function CheckoutItems({
   onQuantityChange: (item: MenuItem, next: number) => void;
 }) {
   return (
-    <section className="border border-border bg-card p-6">
-      <h2 className="font-display text-lg font-semibold">Your items</h2>
-      <ul className="mt-4 divide-y divide-border">
+    <section className="border-t border-border pt-6">
+      <h2 className="font-display text-title">Your items</h2>
+      <ul className="mt-2 divide-y divide-border">
         {lines.map(({ item, quantity }) => (
-          <li key={item.id} className="flex items-center justify-between gap-4 py-3">
+          <li key={item.id} className="flex items-center justify-between gap-4 py-4">
             <div>
               <p className="font-medium">{item.name}</p>
-              <p className="text-sm text-muted-foreground ttc-num">
+              <p className="mt-0.5 text-sm text-muted-foreground ttc-num">
                 {formatMoney(item.price)} each
               </p>
             </div>

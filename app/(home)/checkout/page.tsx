@@ -111,14 +111,14 @@ export default function CheckoutPage() {
 
   if (!lines.length) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-20 text-center sm:px-6">
-        <h1 className="font-display text-3xl font-semibold">Your tiffin is empty</h1>
-        <p className="mt-3 text-muted-foreground">
+      <div className="shell py-24 text-center sm:py-32">
+        <h1 className="mx-auto max-w-[20ch] font-display text-3xl">Your tiffin is empty</h1>
+        <p className="mx-auto mt-4 max-w-[40ch] text-muted-foreground">
           Head back to today&apos;s menu to add the main meal and any extras.
         </p>
         <Link
           href="/"
-          className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-primary px-6 py-2.5 font-semibold text-primary-foreground transition hover:opacity-90 active:scale-[0.98]"
+          className="mt-8 inline-flex min-h-11 items-center rounded-lg bg-primary px-6 py-2.5 font-semibold text-primary-foreground transition hover:opacity-90 active:scale-[0.98]"
         >
           View today&apos;s menu
         </Link>{" "}
@@ -128,22 +128,25 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 pb-16 pt-10 sm:px-6">
-      <h1 className="font-display text-3xl font-semibold sm:text-4xl">Checkout</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        No online payment. You&apos;ll pay in person at pickup or delivery.
-      </p>
+    <div className="shell pb-24 pt-12">
+      <div className="max-w-[52ch]">
+        <h1 className="font-display text-section">Checkout</h1>
+        <p className="lead mt-4 text-muted-foreground">
+          No online payment. You&apos;ll pay in person at pickup or delivery.
+        </p>
+      </div>
 
       {!orderable && ordering && (
-        <div className="mt-6 border border-border bg-card p-5 text-sm">
+        <div className="mt-8 border-l-2 border-l-destructive bg-secondary px-5 py-4 text-sm">
           {ordering.opens_at && ordering.closes_at
             ? `Ordering is currently closed. Ordering is open ${formatTime(ordering.opens_at)}-${formatTime(ordering.closes_at)} NZ.`
             : "We couldn't confirm the ordering window. Please try again shortly."}
         </div>
       )}
 
-      <form onSubmit={submit} className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
-        <div className="space-y-8">
+      <form onSubmit={submit} className="mt-12 grid items-start gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_360px]">
+        {/* The flow reads as one ruled column: each section sits under a hairline. */}
+        <div className="space-y-12">
           <FulfilmentSelector
             fulfilment={fulfilment}
             onSelect={setFulfilment}

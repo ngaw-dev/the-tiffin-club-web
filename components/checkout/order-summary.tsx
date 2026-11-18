@@ -22,9 +22,9 @@ export function OrderSummary({
   submitting?: boolean;
 }) {
   return (
-    <aside className="h-fit border border-border bg-card p-6 lg:sticky lg:top-24">
-      <h2 className="font-display text-lg font-semibold">Order summary</h2>
-      <ul className="mt-3 space-y-2 text-sm">
+    <aside className="h-fit rounded-lg bg-secondary p-6 lg:sticky lg:top-24">
+      <h2 className="font-display text-title">Order summary</h2>
+      <ul className="mt-4 space-y-2.5 text-sm">
         {lines.map((line) => (
           <li key={line.item.id} className="flex justify-between gap-3">
             <span>
@@ -34,14 +34,15 @@ export function OrderSummary({
           </li>
         ))}
       </ul>
-      <div className="mt-4 flex justify-between border-t border-border pt-4 text-base font-semibold">
-        <span>Total</span>
-        <span className="ttc-num">{formatMoney(total)}</span>
+      {/* The total is the offer: set big in the display face, on its own rule. */}
+      <div className="mt-5 flex items-baseline justify-between border-t border-border pt-5">
+        <span className="font-display text-lg">Total</span>
+        <span className="font-display text-2xl ttc-num">{formatMoney(total)}</span>
       </div>
       {address ? (
-        <div className="mt-3 rounded-lg bg-secondary px-3 py-2.5 text-xs text-secondary-foreground">
-          <span className="font-semibold">
-            {fulfilment === "pickup" ? "Pickup" : "Delivery"} address:
+        <p className="mt-4 text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">
+            {fulfilment === "pickup" ? "Pickup" : "Delivery"}:
           </span>{" "}
           {mapUrl ? (
             <a
@@ -55,9 +56,9 @@ export function OrderSummary({
           ) : (
             address
           )}
-        </div>
+        </p>
       ) : null}
-      <p className="mt-2 rounded-lg bg-secondary px-3 py-2.5 text-xs text-secondary-foreground">
+      <p className="mt-2 text-xs text-muted-foreground">
         Pay in person at {fulfilment === "pickup" ? "pickup" : "delivery"}.
       </p>
 
@@ -65,7 +66,7 @@ export function OrderSummary({
         type="submit"
         size="lg"
         disabled={submitting}
-        className="mt-5 min-h-11 w-full rounded-lg font-semibold"
+        className="mt-6 min-h-11 w-full rounded-lg font-semibold"
       >
         {submitting ? "Placing order…" : `Place ${fulfilment} order · ${formatMoney(total)}`}
       </Button>

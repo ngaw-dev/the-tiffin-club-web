@@ -57,15 +57,22 @@ function FulfilmentOption({
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className={`border p-4 text-left transition hover:-translate-y-0.5 ${
+      className={`border p-5 text-left transition hover:-translate-y-0.5 ${
         selected
-          ? "border-primary bg-primary/5 ring-2 ring-ring"
+          ? "border-primary bg-primary/8"
           : "border-border bg-background hover:bg-secondary/60"
       }`}
     >
-      <OptionIcon name={icon} />
-      <p className="mt-1.5 font-semibold">{title}</p>
-      <p className="mt-0.5 text-xs text-muted-foreground">{detail}</p>
+      <div className="flex items-center justify-between">
+        <OptionIcon name={icon} />
+        {/* Selection reads by fill and border, never a status dot. */}
+        <span
+          aria-hidden
+          className={`h-2.5 w-2.5 rounded-full ${selected ? "bg-primary" : "border border-border"}`}
+        />
+      </div>
+      <p className="mt-2 font-semibold">{title}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{detail}</p>
     </button>
   );
 }
@@ -81,8 +88,8 @@ export function FulfilmentSelector({
   pickupDetail: string | null;
 }) {
   return (
-    <section className="border border-border bg-card p-6">
-      <h2 className="font-display text-lg font-semibold">Pickup or delivery?</h2>
+    <section className="border-t border-border pt-6">
+      <h2 className="font-display text-title">Pickup or delivery?</h2>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <FulfilmentOption
           selected={fulfilment === "pickup"}

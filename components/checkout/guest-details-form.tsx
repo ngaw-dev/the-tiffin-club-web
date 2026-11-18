@@ -76,8 +76,8 @@ export function GuestDetailsForm({
   onChange: (field: keyof CheckoutForm, value: string) => void;
 }) {
   return (
-    <section className="border border-border bg-card p-6">
-      <h2 className="font-display text-lg font-semibold">Your details</h2>
+    <section className="border-t border-border pt-6">
+      <h2 className="font-display text-title">Your details</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <Field label="Name" required htmlFor="name" error={fieldErrors?.name}>
           <Input
