@@ -1,4 +1,9 @@
 "use client";
+/* Hallmark · theme: brand (kept) · redesign: full · scope: app · genre: editorial
+ * shape: Ledger · the orders list is dated receipt rows ruled by hairlines, the detail pane is the day's docket
+ * signature: the order's journey as the docket's visual head, the stepper beneath it
+ * critique: weakest S, an order-tracking screen could serve any shop; it reads as this one through the tiffin copy and the pay-in-person rule */
+/* Hallmark · dismissed 49 · the lookup line is the kept copy and may wrap to two lines in its ruled row */
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -9,7 +14,6 @@ import { toast, Toaster } from "sonner";
 import { ArrowLeft, ChevronRight, UtensilsCrossed } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,8 +23,8 @@ import { getMyOrders } from "@/lib/account";
 import { todayOrders } from "@/lib/order-store";
 import { CancelOrderDialog } from "@/app/(home)/cancel-order-dialog";
 import { useAuth } from "@clerk/nextjs";
-import type { Fulfilment, Order, OrderStatus } from "@/lib/types";
-import { OrderCard as SharedOrderCard } from "@/components/order-card";
+import type { Order } from "@/lib/types";
+import { OrderCard as SharedOrderCard, stepSummary } from "@/components/order-card";
 
 export default function OrderPage() {
   return (
@@ -30,29 +34,6 @@ export default function OrderPage() {
   );
 }
 
-const stepTitles: Record<string, string> = {
-  placed: "Placed",
-  confirmed: "Confirmed",
-  ready_for_pickup: "Ready for pickup",
-  out_for_delivery: "Out for delivery",
-  completed: "Completed",
-};
-
-/** Compact "step X of N — Current" summary for list rows. */
-function stepSummary(status: OrderStatus, fulfilment: Fulfilment) {
-  const steps =
-    fulfilment === "pickup"
-      ? ["placed", "confirmed", "ready_for_pickup", "completed"]
-      : ["placed", "confirmed", "out_for_delivery", "completed"];
-  const index = steps.indexOf(status);
-  const current = index >= 0 ? status : "placed";
-  return {
-    label: stepTitles[current] ?? String(current),
-    step: (index >= 0 ? index : 0) + 1,
-    total: steps.length,
-    pct: ((index >= 0 ? index : 0) / (steps.length - 1)) * 100,
-  };
-}
 
 function OrderClient() {
   const params = useSearchParams();
@@ -116,13 +97,17 @@ function OrderClient() {
     return (
       <PageShell>
         <PageHeading count={null} />
-        <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-          <div className="space-y-3">
-            {[0, 1].map((i) => (
-              <Skeleton key={i} className="h-[86px] w-full rounded-lg" />
-            ))}
-          </div>
-          <Skeleton className="h-72 w-full rounded-lg" />
+        {/* Loading reads as the ledger itself: ruled rows, then the docket. */}
+        <div aria-hidden className="mt-10 border-t border-border">
+          {[0, 1].map((i) => (
+            <div key={i} className="border-b border-border py-4">
+              <Skeleton className="h-5 w-2/5 rounded-none" />
+              <Skeleton className="mt-2 h-4 w-1/4 rounded-none" />
+            </div>
+          ))}
+        </div>
+        <div className="mt-10">
+          <Skeleton className="h-72 w-full rounded-none" />
         </div>
       </PageShell>
     );
@@ -140,12 +125,13 @@ function OrderClient() {
     return (
       <PageShell>
         <PageHeading count={0} />
-        <div className="mx-auto max-w-md py-14 text-center">
-          <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-secondary">
-            <UtensilsCrossed className="size-6 text-muted-foreground" />
+        {/* The empty state is a ruled section of the ledger, not a centred card. */}
+        <section className="mt-10 border-t border-border pt-8">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="font-display text-title">No order found</h2>
+            <UtensilsCrossed aria-hidden className="size-5 shrink-0 text-muted-foreground" />
           </div>
-          <h2 className="mt-5 font-display text-xl font-semibold">No order found</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-3 max-w-[45ch] text-sm text-muted-foreground">
             {isSignedIn
               ? "You haven't placed any orders yet — today's menu is waiting."
               : "We couldn't find an order on this device. Use the lookup below with your manage token and contact details."}
@@ -153,15 +139,22 @@ function OrderClient() {
           <Button asChild className="mt-6 min-h-11">
             <Link href="/#todays-menu">Browse today&apos;s menu</Link>
           </Button>
-          {isSignedIn !== true && (
-            <LookupSection
-              onFound={(o) => {
-                setLookupOrders((prev) => [o, ...prev]);
-                setSelectedToken(o.manage_token);
-              }}
-            />
-          )}
-        </div>
+          {/* The empty ledger keeps its ruled-lines motif (as in loading) so
+              the section reads as an empty page of the ledger, not a bare
+              heading and button. */}
+          <div aria-hidden className="mt-10 border-t border-border">
+            <div className="border-b border-border py-7" />
+            <div className="border-b border-border py-7" />
+          </div>
+        </section>
+        {isSignedIn !== true && (
+          <LookupSection
+            onFound={(o) => {
+              setLookupOrders((prev) => [o, ...prev]);
+              setSelectedToken(o.manage_token);
+            }}
+          />
+        )}
         <Toaster richColors position="top-center" />
       </PageShell>
     );
@@ -174,8 +167,8 @@ function OrderClient() {
       <PageHeading count={allOrders.length} />
 
       {placed && (
-        <div className="mb-6 rounded-lg border border-primary/25 bg-primary/5 p-5 text-center">
-          <h2 className="font-display text-xl font-semibold sm:text-2xl">Order placed!</h2>
+        <div className="mt-8 border-l-2 border-primary bg-secondary px-5 py-4">
+          <h2 className="font-display text-title">Order placed!</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             We&apos;ll see you soon
             {selected.customer?.name ? `, ${selected.customer.name}` : ""}. Pay in person at{" "}
@@ -184,10 +177,10 @@ function OrderClient() {
         </div>
       )}
 
-      <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-        {/* Left: order list (hidden on mobile once a detail is open) */}
+      <div className="mt-10 grid items-start gap-x-12 gap-y-10 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+        {/* Left: the ledger — dated receipt rows under hairlines (hidden on mobile once a detail is open) */}
         <div className={selectedToken ? "hidden md:block" : "block"}>
-          <ul className="space-y-3">
+          <ul className="border-t border-border">
             {allOrders.map((order) => {
               const done = order.status === "completed" || order.status === "cancelled";
               const summary = stepSummary(order.status, order.fulfilment);
@@ -198,23 +191,23 @@ function OrderClient() {
                     type="button"
                     aria-current={active ? "true" : undefined}
                     onClick={() => setSelectedToken(order.manage_token)}
-                    className={`group w-full rounded-lg border p-4 text-left transition-[transform,box-shadow,border-color] duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-sm motion-safe:active:translate-y-0 ${
-                      active
-                        ? "border-primary bg-primary/5 shadow-sm"
-                        : "border-border bg-card hover:border-foreground/25 hover:bg-accent/50"
+                    className={`group -mx-3 w-[calc(100%+1.5rem)] border-b border-border px-3 py-4 text-left outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:bg-secondary ${
+                      active ? "bg-secondary" : "hover:bg-secondary/60"
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-2 text-sm">
-                      <span className="font-medium">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="font-display text-md">
                         {new Date(order.placed_at).toLocaleDateString(undefined, {
                           weekday: "short",
                           day: "numeric",
                           month: "short",
                         })}
                       </span>
-                      <span className="ttc-num font-semibold">{formatMoney(order.total)}</span>
+                      <span className="ttc-num text-sm font-semibold">
+                        {formatMoney(order.total)}
+                      </span>
                     </div>
-                    <div className="mt-2.5 flex items-center gap-2">
+                    <div className="mt-2 flex items-center gap-2">
                       <Badge variant="secondary" className="capitalize">
                         {order.fulfilment}
                       </Badge>
@@ -225,13 +218,14 @@ function OrderClient() {
                       ) : (
                         <Badge variant="secondary" className="gap-1.5 capitalize">
                           <span className="relative flex size-2">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                            <span className="absolute inline-flex h-full w-full motion-safe:animate-ping rounded-full bg-primary opacity-75" />
                             <span className="relative inline-flex size-2 rounded-full bg-primary" />
                           </span>
                           {summary.label}
                         </Badge>
                       )}
                       <ChevronRight
+                        aria-hidden
                         className={`ml-auto size-4 shrink-0 transition-transform duration-200 ${
                           active
                             ? "text-primary"
@@ -245,6 +239,8 @@ function OrderClient() {
             })}
           </ul>
 
+          {/* The lookup continues the ledger: its collapsed row reads as one
+              more ruled entry, not a dangling link. */}
           {isSignedIn !== true && (
             <LookupSection
               onFound={(o) => {
@@ -255,7 +251,7 @@ function OrderClient() {
           )}
         </div>
 
-        {/* Right: selected order details */}
+        {/* Right: the day's docket — the selected order */}
         <div className={selectedToken ? "block" : "hidden md:block md:sticky md:top-24"}>
           {/* Mobile back-to-list affordance */}
           <Button
@@ -294,8 +290,8 @@ function OrderClient() {
         />
       )}
 
-      <div className="mt-8">
-        <Button asChild variant="link">
+      <div className="mt-12 border-t border-border pt-6">
+        <Button asChild variant="link" className="min-h-11 px-0">
           <Link href="/">Back to today&apos;s menu</Link>
         </Button>
       </div>
@@ -305,16 +301,18 @@ function OrderClient() {
 }
 
 function PageShell({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto max-w-5xl px-4 pb-16 pt-10 sm:px-6">{children}</div>;
+  return (
+    <div className="shell pb-24 pt-12">
+      <div className="mx-auto max-w-5xl">{children}</div>
+    </div>
+  );
 }
 
 function PageHeading({ count }: { count: number | null }) {
   return (
-    <div className="mb-8">
-      <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-        Your orders
-      </h1>
-      <p className="mt-2 text-sm text-muted-foreground">
+    <div>
+      <h1 className="max-w-[20ch] font-display text-section tracking-tight">Your orders</h1>
+      <p className="mt-3 text-muted-foreground">
         {count === null
           ? "Checking this device for your orders…"
           : count === 0
@@ -325,7 +323,8 @@ function PageHeading({ count }: { count: number | null }) {
   );
 }
 
-/** Manual token+contact lookup for orders placed on another device. */
+/** Manual token+contact lookup for orders placed on another device. A ruled
+    section of the ledger, collapsed by default. */
 function LookupSection({ onFound }: { onFound: (o: Order) => void }) {
   const [token, setToken] = useState("");
   const [contact, setContact] = useState("");
@@ -354,60 +353,63 @@ function LookupSection({ onFound }: { onFound: (o: Order) => void }) {
   }
 
   return (
-    <section className="mt-10">
+    <section>
       {open ? (
-        <form onSubmit={submit} className="space-y-4">
-          <Card className="rounded-lg">
-            <CardContent className="p-6">
-              <h2 className="font-display text-lg font-semibold">Ordered on another device?</h2>
-              <p className="text-sm text-muted-foreground">
-                Enter the manage token from your confirmation plus the email or phone you used.
-              </p>
-              <div className="space-y-1.5">
-                <Label htmlFor="lookup-token">Manage token</Label>
-                <Input
-                  id="lookup-token"
-                  required
-                  className="min-h-11 rounded-lg px-3.5"
-                  value={token}
-                  onChange={(e) => setToken(e.target.value)}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="lookup-contact">Email or phone</Label>
-                <Input
-                  id="lookup-contact"
-                  required
-                  className="min-h-11 rounded-lg px-3.5"
-                  value={contact}
-                  onChange={(e) => setContact(e.target.value)}
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button type="submit" className="min-h-11" disabled={busy}>
-                  {busy ? "Looking up…" : "Find order"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="min-h-11"
-                  onClick={() => setOpen(false)}
-                  disabled={busy}
-                >
-                  Close
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <form onSubmit={submit} className="max-w-md space-y-5 border-b border-border py-6">
+          <div>
+            <h2 className="font-display text-title">Ordered on another device?</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Enter the manage token from your confirmation plus the email or phone you used.
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="lookup-token">Manage token</Label>
+            <Input
+              id="lookup-token"
+              required
+              className="min-h-11 rounded-lg px-3.5"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="lookup-contact">Email or phone</Label>
+            <Input
+              id="lookup-contact"
+              required
+              className="min-h-11 rounded-lg px-3.5"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              type="submit"
+              className="min-h-11 disabled:cursor-not-allowed disabled:opacity-55"
+              disabled={busy}
+            >
+              {busy ? "Looking up…" : "Find order"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-11 disabled:cursor-not-allowed disabled:opacity-55"
+              onClick={() => setOpen(false)}
+              disabled={busy}
+            >
+              Close
+            </Button>
+          </div>
         </form>
       ) : (
-        <Button
-          variant="link"
+        <button
+          type="button"
           onClick={() => setOpen(true)}
-          className="min-h-11 px-0 text-sm font-normal text-muted-foreground"
+          className="flex w-full items-center justify-between gap-3 border-b border-border py-4 text-left text-sm text-ink-2 outline-none transition-colors duration-200 hover:bg-secondary/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:bg-secondary"
         >
           Ordered on another device? Find your order
-        </Button>
+          <ChevronRight aria-hidden className="size-4 shrink-0 text-muted-foreground/50" />
+        </button>
       )}
     </section>
   );

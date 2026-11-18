@@ -61,15 +61,19 @@ export function FulfilmentStepper({
                 <StepperIndicator>
                   {(state) =>
                     state === "completed" ? (
-                      <Check className="size-4" />
+                      <Check className="size-4 text-primary" />
                     ) : (
-                      <Icon className="size-4" />
+                      <Icon className="size-4 text-primary" />
                     )
                   }
                 </StepperIndicator>
                 <StepperTitle>{step.title}</StepperTitle>
               </StepperTrigger>
-              <StepperSeparator className="mx-3 max-sm:mx-0 max-sm:mb-1 max-sm:ml-3.5 max-sm:h-4 max-sm:w-px" />
+              {/* Plain defect fix (Hallmark pass): the inactive connector's
+                  bg-border is invisible on the docket's paper-2 well (ink at
+                  30% keeps the track continuous), and a wrapped title could
+                  squeeze the connector to zero width. */}
+              <StepperSeparator className="mx-3 min-w-6 max-sm:mx-0 max-sm:mb-1 max-sm:ml-3.5 max-sm:h-4 max-sm:w-px data-[state=inactive]:bg-ink/30" />
             </StepperItem>
           );
         })}
