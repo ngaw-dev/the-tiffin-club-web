@@ -198,7 +198,7 @@ function OrderClient() {
                     type="button"
                     aria-current={active ? "true" : undefined}
                     onClick={() => setSelectedToken(order.manage_token)}
-                    className={`group w-full rounded-lg border p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 ${
+                    className={`group w-full rounded-lg border p-4 text-left transition-[transform,box-shadow,border-color] duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-sm motion-safe:active:translate-y-0 ${
                       active
                         ? "border-primary bg-primary/5 shadow-sm"
                         : "border-border bg-card hover:border-foreground/25 hover:bg-accent/50"

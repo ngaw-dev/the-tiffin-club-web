@@ -10,6 +10,7 @@ import { useCart } from "@/lib/cart-context";
 import { Hero } from "@/app/(home)/blocks/hero";
 import { HowItWorks } from "@/app/(home)/blocks/how-it-works";
 import { Faq } from "@/app/(home)/blocks/faq";
+import { Visit } from "@/app/(home)/blocks/visit";
 import { TodayMenuSection } from "@/components/todays-menu";
 import type { MenuItem } from "@/lib/types";
 
@@ -52,30 +53,37 @@ export function HomeClient() {
   }, [mainItem, addItem]);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6">
-      {/* Hero */}
-      <Hero windowLabel={windowLabel} />
+    <div className="shell">
+      {/* Counter hero: the text block and the live menu card share the first
+          screen — the card is the hero visual, not a photograph. */}
+      <div className="grid gap-[var(--space-2xl)] py-[var(--space-xl)] lg:grid-cols-[5fr_7fr] lg:items-start lg:py-[var(--space-2xl)]">
+        <Hero windowLabel={windowLabel} />
 
-      <TodayMenuSection
-        loading={menuQuery.isPending}
-        loadError={menuQuery.isError}
-        menuPublished={!!menu && menu.status !== "coming_soon"}
-        ordering={ordering}
-        windowLabel={windowLabel}
-        mainItem={mainItem ?? null}
-        extras={extras}
-        lines={lines}
-        total={total}
-        orderable={orderable}
-        contact={{ phone: contact.phone, phoneHref: contact.phoneHref }}
-        onQuantityChange={setQuantity}
-      />
+        <TodayMenuSection
+          loading={menuQuery.isPending}
+          loadError={menuQuery.isError}
+          menuPublished={!!menu && menu.status !== "coming_soon"}
+          ordering={ordering}
+          windowLabel={windowLabel}
+          mainItem={mainItem ?? null}
+          extras={extras}
+          lines={lines}
+          total={total}
+          orderable={orderable}
+          contact={{ phone: contact.phone, phoneHref: contact.phoneHref }}
+          onQuantityChange={setQuantity}
+        />
+      </div>
 
       {/* How it works */}
       <HowItWorks windowLabel={windowLabel} contact={contact} />
 
       {/* FAQ */}
       <Faq windowLabel={windowLabel} />
+
+      {/* Close: the order again, with hours and the address */}
+      <Visit windowLabel={windowLabel} contact={contact} />
+
 
       <Toaster richColors position="top-center" />
     </div>

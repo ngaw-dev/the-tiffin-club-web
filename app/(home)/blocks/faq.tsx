@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+// app/(home)/blocks/faq.tsx
 
 import {
   Accordion,
@@ -11,36 +11,7 @@ import {
 
 import { AccordionIndicator } from "@/components/shadcnblocks/accordion-indicator";
 
-type Box = { top: number; height: number };
-
 export function Faq({ windowLabel }: { windowLabel: string | null }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [hovered, setHovered] = useState<HTMLElement | null>(null);
-  const [box, setBox] = useState<Box | null>(null);
-
-  // Track the hovered item's size so the highlight follows it while it opens.
-  useEffect(() => {
-    if (!hovered || !ref.current) {
-      setBox(null);
-      return;
-    }
-    const root = ref.current;
-    const measure = () => {
-      const rootRect = root.getBoundingClientRect();
-      const rect = hovered.getBoundingClientRect();
-      setBox({ top: rect.top - rootRect.top, height: rect.height });
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(hovered);
-    return () => observer.disconnect();
-  }, [hovered]);
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const item = (event.target as HTMLElement).closest<HTMLElement>('[data-slot="accordion-item"]');
-    if (item && item !== hovered) setHovered(item);
-  };
-
   const items = [
     ...(windowLabel
       ? [
@@ -71,33 +42,26 @@ export function Faq({ windowLabel }: { windowLabel: string | null }) {
   ];
 
   return (
-    <section id="faq" className="scroll-mt-24 pb-16">
-      <h2 className="font-display text-2xl font-semibold sm:text-3xl">Common questions</h2>
-      <div
-        className="relative mt-6 w-full rounded-xl border border-border bg-card p-1.5"
-        onPointerLeave={() => setHovered(null)}
-        onPointerMove={handlePointerMove}
-        ref={ref}
-      >
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-1.5 rounded-lg bg-muted transition-[top,height,opacity] duration-200 ease-out"
-          style={{
-            top: box?.top ?? 0,
-            height: box?.height ?? 0,
-            opacity: box ? 1 : 0,
-          }}
-        />
-        <Accordion type="single" collapsible className="relative">
+    <section id="faq" className="scroll-mt-24 pb-[var(--section-gap-s)]">
+      {/* Rows: the head sits beside the questions, parted by hairlines. */}
+      <div className="grid gap-[var(--space-2xl)] lg:grid-cols-[5fr_7fr]">
+        <h2 className="text-section">Common questions</h2>
+        <Accordion
+          type="single"
+          collapsible
+          className="border-t border-border [&_[data-slot=accordion-item]]:border-border"
+        >
           {items.map((item) => (
-            <AccordionItem key={item.id} value={item.id} className="px-4 py-1 not-last:border-b-0">
+            <AccordionItem
+              key={item.id}
+              value={item.id}
+              className="px-[var(--space-md)] motion-safe:transition-colors motion-safe:duration-200 data-[state=open]:bg-secondary/60"
+            >
               <AccordionTrigger className="items-center font-medium hover:no-underline [&>svg]:hidden!">
                 {item.q}
                 <AccordionIndicator className="ml-auto" variant="chevron" />
               </AccordionTrigger>
-              <AccordionContent className="text-sm text-muted-foreground">
-                {item.a}
-              </AccordionContent>
+              <AccordionContent className="text-muted-foreground">{item.a}</AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>

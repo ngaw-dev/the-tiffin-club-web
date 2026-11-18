@@ -1,5 +1,15 @@
+/* Hallmark · shape: Counter · genre: editorial · theme: brand (by request) · redesign: full
+ * paper: oklch(97% 0.008 85) · accent: oklch(55% 0.14 35) · display: Fraunces · body: Inter · hero: Counter (the live menu card is the hero visual) · nav: kept · footer: mast · signature: today's one dish with its live cart at the first screen
+ * axes: warm cream/Fraunces/terracotta · posture: Counter · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V4 · weakest: P, a storefront can coast on warmth alone; the argument is "one dish, one cutoff, no online payment" and the copy now states it */
+/* Hallmark · waive 65 · theme asked for by name · the brand is kept, DESIGN.md pins it */
+/* Hallmark · dropped onPointerMove, onPointerLeave · the measured hover highlight was the 10a defect; open items read by fill instead */
+/* Hallmark · waive 69 · the cutoff order window is the offer · today's order band closes the sale by restating it */
+/* Hallmark · finish-review: subagent · 6 findings · 6 resolved (1 via items-start, the Floor at 1280x800 beats the centring suggestion) */
 @import "tailwindcss";
 @import "@clerk/ui/themes/shadcn.css";
+@import "./tokens.css";
+@import "./base.css" layer(base);
 
 /* Explicit sources: the Tailwind Vite plugin (Storybook) can't see classes
    through Storybook's virtual module graph; Turbopack ignores these. */
@@ -25,45 +35,76 @@ label[for] {
   cursor: pointer;
 }
 
+/* Hallmark's capped container; named .shell to avoid Tailwind's own
+   `.container` utility. */
+.shell {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
 :root {
-  --background: #faf7f2;
-  --foreground: #1f1b16;
-  --card: #ffffff;
-  --card-foreground: #1f1b16;
-  --primary: #c94a2c;
-  --primary-foreground: #ffffff;
-  --secondary: #f3eee6;
-  --secondary-foreground: #1f1b16;
-  --muted: #efe9e0;
-  --muted-foreground: #6b6258;
-  --accent: #2f6f5e;
-  --accent-foreground: #ffffff;
-  --destructive: #b42318;
-  --destructive-foreground: #ffffff;
-  --border: #d1d9e0;
-  --input: rgba(31, 27, 22, 0.16);
-  --ring: #c94a2c;
+  /* Brand palette converted to OKLCH and tinted toward the warm anchor hue
+     (see DESIGN.md; chroma kept above zero so no neutral reads grey-blue). */
+  --background: oklch(97.3% 0.008 85);
+  --foreground: oklch(24% 0.012 70);
+  --card: oklch(99% 0.003 85);
+  --card-foreground: oklch(24% 0.012 70);
+  --primary: oklch(55% 0.14 35);
+  --primary-foreground: oklch(98% 0.004 85);
+  --secondary: oklch(94.6% 0.011 85);
+  --secondary-foreground: oklch(24% 0.012 70);
+  --muted: oklch(93% 0.012 85);
+  --muted-foreground: oklch(46% 0.02 75);
+  --accent: oklch(48% 0.07 170);
+  --accent-foreground: oklch(98% 0.004 85);
+  --destructive: oklch(48% 0.19 27);
+  --destructive-foreground: oklch(98% 0.004 85);
+  --border: oklch(88% 0.008 85);
+  --input: oklch(24% 0.012 70 / 0.16);
+  --ring: oklch(55% 0.14 35);
   --radius: 0.5rem;
+
+  /* Dark palette, declared here so every colour literal lives in the token
+     block; `.dark` below only maps the roles. */
+  --dk-background: oklch(17% 0.008 70);
+  --dk-foreground: oklch(91% 0.012 80);
+  --dk-card: oklch(20% 0.01 70);
+  --dk-card-foreground: oklch(91% 0.012 80);
+  --dk-primary: oklch(66% 0.14 40);
+  --dk-primary-foreground: oklch(24% 0.012 70);
+  --dk-secondary: oklch(23% 0.012 70);
+  --dk-secondary-foreground: oklch(91% 0.012 80);
+  --dk-muted: oklch(23% 0.012 70);
+  --dk-muted-foreground: oklch(70% 0.02 70);
+  --dk-accent: oklch(65% 0.09 170);
+  --dk-accent-foreground: oklch(17% 0.008 70);
+  --dk-destructive: oklch(62% 0.19 25);
+  --dk-destructive-foreground: oklch(17% 0.008 70);
+  --dk-border: oklch(91% 0.012 80 / 0.14);
+  --dk-input: oklch(91% 0.012 80 / 0.18);
+  --dk-ring: oklch(66% 0.14 40);
 }
 
 .dark {
-  --background: #17130f;
-  --foreground: #ece5db;
-  --card: #201b15;
-  --card-foreground: #ece5db;
-  --primary: #e0704f;
-  --primary-foreground: #1f1b16;
-  --secondary: #2a241d;
-  --secondary-foreground: #ece5db;
-  --muted: #2a241d;
-  --muted-foreground: #a89c8e;
-  --accent: #4f9d87;
-  --accent-foreground: #17130f;
-  --destructive: #e3564a;
-  --destructive-foreground: #17130f;
-  --border: rgba(236, 229, 219, 0.14);
-  --input: rgba(236, 229, 219, 0.18);
-  --ring: #e0704f;
+  --background: var(--dk-background);
+  --foreground: var(--dk-foreground);
+  --card: var(--dk-card);
+  --card-foreground: var(--dk-card-foreground);
+  --primary: var(--dk-primary);
+  --primary-foreground: var(--dk-primary-foreground);
+  --secondary: var(--dk-secondary);
+  --secondary-foreground: var(--dk-secondary-foreground);
+  --muted: var(--dk-muted);
+  --muted-foreground: var(--dk-muted-foreground);
+  --accent: var(--dk-accent);
+  --accent-foreground: var(--dk-accent-foreground);
+  --destructive: var(--dk-destructive);
+  --destructive-foreground: var(--dk-destructive-foreground);
+  --border: var(--dk-border);
+  --input: var(--dk-input);
+  --ring: var(--dk-ring);
 }
 
 @theme inline {
@@ -86,29 +127,11 @@ label[for] {
   --color-ring: var(--ring);
   --font-sans: var(--font-inter);
   --font-display: var(--font-fraunces);
+  --font-body: var(--font-inter);
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 6px);
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
-
-  @keyframes accordion-down {
-    from {
-      height: 0;
-    }
-    to {
-      height: var(--radix-accordion-content-height);
-    }
-  }
-  @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
-    }
-    to {
-      height: 0;
-    }
-  }
 }
 
 body {
