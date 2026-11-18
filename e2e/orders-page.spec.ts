@@ -1,6 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, request, test, type Page } from "@playwright/test";
 import { capturePageErrors } from "./helpers/page-errors";
-import { injectSimulatedTime } from "./helpers/simulated-time";
+import { DEFAULT_SIMULATED_TIME, injectSimulatedTime } from "./helpers/simulated-time";
 import { fakeGuest, seedFaker } from "./helpers/fake-guest";
 
 // Orders page (/orders) guest surface, complementing journey.spec (full
@@ -157,8 +157,20 @@ test("delivery order shows the delivery address on /orders", async ({ page }) =>
   // shape) to cover the frontend rendering; drop this route once the backend
   // includes customer and assert against the live response.
   const DELIVERY_ADDRESS = "12 Mockelivery Grove";
+  // route.fetch() goes through Node's fetch, which rejects the ddev backend's
+  // self-signed cert (context-level ignoreHTTPSErrors doesn't apply to it), so
+  // the upstream call is made through a request context built with
+  // ignoreHTTPSErrors instead. That bypasses injectSimulatedTime's handler, so
+  // the header must be re-stamped here — without it the backend reads the
+  // order at real time and the order day is past (410 Gone).
+  const api = await request.newContext({ ignoreHTTPSErrors: true });
   await page.route(/\/api\/v1\/orders\//, async (route) => {
-    const response = await route.fetch();
+    const headers = { ...route.request().headers(), "x-simulated-time": DEFAULT_SIMULATED_TIME };
+    const response = await api.fetch(route.request().url(), {
+      method: route.request().method(),
+      headers,
+      maxRedirects: 0,
+    });
     const body = await response.json();
     if (body?.data) {
       body.data.fulfilment = "delivery";

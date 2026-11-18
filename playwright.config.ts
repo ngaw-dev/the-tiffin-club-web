@@ -20,7 +20,10 @@ export default defineConfig({
   workers: 1,
   reporter: [["list"]],
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3100",
+    // 3210, not 3100: port 3100 is squatted by an unrelated local tool
+    // (paperclip daemon) that respawns when killed, and reuseExistingServer
+    // would silently run the suite against the wrong app.
+    baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3210",
     // Local ddev backend uses a self-signed cert.
     ignoreHTTPSErrors: true,
     trace: "retain-on-failure",
@@ -32,8 +35,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm dev --port 3100",
-    url: "http://localhost:3100",
+    command: "pnpm dev --port 3210",
+    url: "http://localhost:3210",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {
