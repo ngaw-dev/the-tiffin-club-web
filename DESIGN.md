@@ -16,33 +16,47 @@ after.
 
 ### Colors
 
-Primary palette is warm orange (appetite appeal); fresh green reserved for
-veg indicators. Defined as shadcn CSS variables (`oklch`), light and dark:
+Warm-cream paper + terracotta accent palette (Hallmark "Counter" redesign,
+2026-11-21). Every colour is `oklch` and tinted toward warm hues (chroma kept
+above zero so no neutral reads grey-blue). shadcn CSS variables live in
+`app/globals.css`; a matching Hallmark token set (paper/ink scale, type ramp,
+spacing, easings) lives in `app/tokens.css`.
 
-| Token                             | Light (approx)               | Dark (approx)              | Usage                          |
-| --------------------------------- | ---------------------------- | -------------------------- | ------------------------------ |
-| `--primary`                       | orange ~`#EA580C`            | brighter orange ~`#FB923C` | CTAs, active states, brand     |
-| `--primary-foreground`            | white                        | near-black                 | Text on primary                |
-| `--secondary`                     | warm brown/neutral           | darker warm neutral        | Secondary buttons, chips       |
-| `--accent` (veg)                  | green ~`#16A34A`             | green ~`#4ADE80`           | Veg indicator dots, "open now" |
-| `--destruct`                      | red                          | red                        | Cancelled, errors, non-veg dot |
-| `--success`                       | green                        | green                      | Delivered, order confirmed     |
-| `--warning`                       | amber                        | amber                      | Delayed, "closing soon"        |
-| `--background` / `--foreground`   | warm white / warm near-black | `#0a0a0a` / `#ededed`      | Page                           |
-| `--muted` / `--border` / `--ring` | shadcn `neutral` scale       | same scale                 | Standard chrome                |
+| Token                             | Light (`oklch`)             | Dark (`oklch`)              | Usage                          |
+| --------------------------------- | --------------------------- | --------------------------- | ------------------------------ |
+| `--background` / `--foreground`   | `97.3% 0.008 85` / `24% 0.012 70` | `17% 0.008 70` / `91% 0.012 80` | Page (warm cream paper / ink) |
+| `--card`                          | `99% 0.003 85`              | `20% 0.01 70`               | Card surfaces                  |
+| `--primary`                       | terracotta `55% 0.14 35`    | brighter `66% 0.14 40`      | CTAs, active states, brand     |
+| `--primary-foreground`            | warm white `98% 0.004 85`   | ink `24% 0.012 70`          | Text on primary                |
+| `--secondary`                     | cream `94.6% 0.011 85`      | `23% 0.012 70`              | Secondary buttons, chips       |
+| `--muted` / `--muted-foreground`  | `93% 0.012 85` / `46% 0.02 75` | `23% 0.012 70` / `70% 0.02 70` | Muted chrome, captions     |
+| `--accent` (veg)                  | green `48% 0.07 170`        | `65% 0.09 170`              | Veg dots, "open now"           |
+| `--destructive`                   | red `48% 0.19 27`           | `62% 0.19 25`               | Cancelled, errors, non-veg dot |
+| `--border` / `--input`            | `88% 0.008 85` / ink 16%    | foreground 14% / 18%        | Rules and inputs               |
+| `--ring`                          | = `--primary`               | = dark `--primary`          | Focus rings                    |
+| `--radius`                        | `0.5rem`                    | —                           | Base radius (sm/md/lg derived) |
+
+Extra Hallmark utilities in `app/tokens.css`: `--color-paper/-2/-3`,
+`--color-ink/-2`, `--color-muted`, `--color-rule`, `--color-accent(-ink)`,
+`--color-focus`, `--color-error`, `--color-success` (`50% 0.12 150`), plus
+spacing (`--space-3xs…4xl`), durations, z-index, and `.shell` container.
 
 ### Typography
 
-- Geist Sans (already configured); Geist Mono for codes/order IDs.
-- Scale: large appetite-driven display headings for sections, medium card
-  titles, comfortable readable body for menus/descriptions.
+- **Fraunces** (serif) for display headings; **Inter** for body. Geist Mono
+  where available for codes/order IDs.
+- Fluid type ramp in `tokens.css`: `--text-display` (clamp 2.75→5.25rem),
+  `--text-display-s`, `--text-section`, `--text-title`, `--text-lead`, down to
+  `--text-xs`. Tabular numerals via `.ttc-num` for prices/times.
 
 ### Spacing & Shape
 
-- Radii: soft — `rounded-lg` (0.75rem) for cards/buttons, `rounded-xl`+ for
-  hero images and modals.
-- Shadows: subtle on meal cards; elevate cart/checkout surfaces.
-- Motion: short (150–200ms) easings; respect `prefers-reduced-motion`.
+- `--radius: 0.5rem` base (sm/md/lg/xl derived); `--radius-card: 0.75rem`,
+  `--radius-pill` for chips/badges.
+- `--shadow-card`: single subtle 1px shadow; cart/checkout surfaces elevate.
+- Motion: `--dur-micro` 120ms / `--dur-short` 220ms / `--dur-long` 420ms with
+  custom easings in `tokens.css`; `prefers-reduced-motion` respected globally
+  in `globals.css`.
 
 ## Styling System
 
@@ -56,8 +70,10 @@ veg indicators. Defined as shadcn CSS variables (`oklch`), light and dark:
   screens), search `@shadcnblocks` and add via
   `npx shadcn add @shadcnblocks/<name>` (auth via `SHADCNBLOCKS_API_KEY`).
   Custom composition only when no suitable block exists.
-- Tailwind CSS v4, tokens mapped through `@theme inline` in `app/globals.css`.
-- Dark mode follows `prefers-color-scheme` via `:root` variable overrides.
+- Tailwind CSS v4, tokens mapped through `@theme inline` in `app/globals.css`
+  plus a `@theme static` Hallmark token block in `app/tokens.css`.
+- Dark palette declared as `--dk-*` variables in `:root` and mapped into roles
+  by the `.dark` class.
 
 ## UI Conventions (food delivery)
 
@@ -103,3 +119,4 @@ shell), `cancel-order-dialog`, `order-store` (localStorage token memory).
 | 2026-11-15 | Find-order modal removed; header "My order" links to `/order`, manual token+contact lookup lives on that page                                                             | Modals lose state and aren't shareable; one home for order management                       |
 | 2026-11-15 | Global pointer-cursor rule in `globals.css` (`button:not(:disabled)`, `[role=button]`, `select`, `summary`, `label[for]`); disabled stays default                         | Tailwind v4 reset defaults buttons to `cursor: default`; one rule beats per-element classes |
 | 2026-11-15 | All raw form controls/buttons replaced with shadcn primitives (Input, Textarea, Select, Button, Label, Card, Accordion); `min-h-11` overrides preserve 44px touch targets | Skill mandate: never hand-roll primitives shadcn provides; a11y tap-target floor kept       |
+| 2026-11-21 | Hallmark "Counter" redesign: warm-cream paper + terracotta palette, Fraunces display / Inter body, `oklch` tokens in `globals.css` + Hallmark token block in `app/tokens.css`, dark palette via `.dark` role mapping, `--radius: 0.5rem` | Replaces the 2026-11-14 orange/`#EA580C` baseline; editorial warmth kept appetite-friendly  |
